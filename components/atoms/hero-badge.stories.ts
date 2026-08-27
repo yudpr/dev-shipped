@@ -9,7 +9,7 @@ import HeroBadge from './hero-badge';
  */
 
 const meta = {
-  title: "Design System/Custom/Hero Badge",
+  title: "Atoms/Hero Badge",
   component: HeroBadge,
   args: {
     children: "Join our community and share your works now",

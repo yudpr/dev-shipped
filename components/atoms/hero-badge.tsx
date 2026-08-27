@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Badge as BaseBadge, badgeVariants } from "../ui/badge";
 import LiveStatusIndicator from "./live-status-indicator";
 
-interface HeroBadge extends 
+interface HeroBadgeProps extends 
   ComponentProps<typeof BaseBadge>,
   VariantProps<typeof badgeVariants>{}
 
@@ -14,7 +14,7 @@ export default function HeroBadge({
   variant="outline",
   className,
   ...props
-}: HeroBadge) {
+}: HeroBadgeProps) {
   return (
     <BaseBadge
       variant={variant}
