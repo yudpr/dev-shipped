@@ -6,7 +6,7 @@ import { buttonVariants } from "../ui/button";
 import Link from "next/link";
 
 interface HeroButtonProps extends
-  ComponentProps<"a">,
+  ComponentProps<typeof Link>,
   VariantProps<typeof buttonVariants> {}
 
 export default function HeroButton({

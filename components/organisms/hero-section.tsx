@@ -1,10 +1,40 @@
-import { Share2, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Share2, ArrowRight, ArrowUpDown } from "lucide-react";
 import HeroBadge from "../atoms/hero-badge";
 import HeroHeading from "../atoms/hero-heading";
 import HeroParagraph from "../atoms/hero-paragraph";
 import HeroButtonGroup from "../molecules/hero-button-group";
 import HeroButton from "../atoms/hero-button";
+import { 
+  Rocket,
+  UsersRound,
+  type LucideIcon 
+} from "lucide-react";
+import HeroStatsGroup from "../molecules/hero-stats-group";
+import HeroStats from "../atoms/hero-stats";
+
+interface HeroStatsType {
+  icon: LucideIcon,
+  value: string,
+  label: string,
+}
+
+export const heroStatsItems: HeroStatsType[] = [
+   {
+      icon: UsersRound,
+      value: "5k+",
+      label: "Developer Community"
+   },
+   {
+      icon: Rocket,
+      value: "7.5k+",
+      label: "Project Shared"
+   },
+   {
+      icon: ArrowUpDown,
+      value: "30k+",
+      label: "Interactions"
+   }
+]
 
 export default function HeroSection() {
   return (
@@ -24,6 +54,9 @@ export default function HeroSection() {
               <ArrowRight data-icon="inline-end"/>
             </HeroButton>
           </HeroButtonGroup>
+          <HeroStatsGroup>
+            { heroStatsItems.map(i => <HeroStats {...i} />) }
+          </HeroStatsGroup>
         </div>
       </div>
     </section>
