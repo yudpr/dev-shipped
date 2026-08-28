@@ -55,7 +55,7 @@ export default function HeroSection() {
             </HeroButton>
           </HeroButtonGroup>
           <HeroStatsGroup>
-            { heroStatsItems.map(i => <HeroStats {...i} />) }
+            { heroStatsItems.map((i, index) => <HeroStats key={`hero-stats-${index}`} {...i} />) }
           </HeroStatsGroup>
         </div>
       </div>
