@@ -1,6 +1,10 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import FeatSection from "./feat-section";
 
+/**
+ * Featured Today Section
+ */
+
 const meta = {
   title: "Organisms/Feat Section",
   component: FeatSection,

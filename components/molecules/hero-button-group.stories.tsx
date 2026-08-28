@@ -5,7 +5,7 @@ import HeroButton from "../atoms/hero-button";
 import { Share2, ArrowRight } from "lucide-react";
 
 /**
- * A button group that controls a group of buttons 
+ * A button group that controls a group of CTA buttons 
  * layouting in hero section.
  */
 

@@ -22,7 +22,7 @@ export default function HomeSectionButton({
       className={
         cn(
           buttonVariants({variant, size}),
-          "hidden sm:inline-flex ml-auto mt-5",
+          "hidden sm:inline-flex ml-auto",
           className
         )
       }
