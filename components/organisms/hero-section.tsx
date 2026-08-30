@@ -21,12 +21,12 @@ interface HeroStatsType {
 export const heroStatsItems: HeroStatsType[] = [
    {
       icon: UsersRound,
-      value: "5k+",
+      value: "1k+",
       label: "Developer Community"
    },
    {
       icon: Rocket,
-      value: "7.5k+",
+      value: "2.5k+",
       label: "Project Shared"
    },
    {
