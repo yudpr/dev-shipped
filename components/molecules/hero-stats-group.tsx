@@ -20,7 +20,7 @@ export default function HeroStatsGroup({
           .flatMap((i, index) => (
             index === 0
               ? [i]
-              : [<Separator className="data-horizontal:w-32 sm:data-horizontal:self-stretch sm:data-horizontal:h-auto sm:data-horizontal:w-px" />, i]
+              : [<Separator key={`hero-stats-separator-${index}`} className="data-horizontal:w-32 sm:data-horizontal:self-stretch sm:data-horizontal:h-auto sm:data-horizontal:w-px" />, i]
           ))
       }
     </div>

@@ -3,7 +3,7 @@ import HeroHeading from "./hero-heading";
 
 
 /**
- * Hero heading
+ * Hero heading with h1.
  */
 
 const meta = {

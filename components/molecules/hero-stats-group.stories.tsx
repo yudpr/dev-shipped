@@ -21,6 +21,15 @@ const heroStatsItems = [
    },
 ]
 
+
+/**
+ * This component loops over hero-stats-items and puts
+ * a shadcn separator in between each two elements of 
+ * the array. This separator can adjust itself based
+ * on the screen, from horizontal to vertical on larger
+ * screen.
+ */
+
 const meta = {
   title: "Molecules/Hero Stats Group",
   component: HeroStatsGroup,
