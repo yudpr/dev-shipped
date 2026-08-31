@@ -4,8 +4,8 @@ import ProjectVoting from './project-voting';
 
 
 /**
- * This is a custom badge that shows a live 
- * status indicator.
+ * This component displays the project voting buttons,
+ * upvote and downvote, as well as the vote amount.
  */
 
 const meta = {
