@@ -1,7 +1,7 @@
 import { ArrowUpRight, Star } from "lucide-react";
 import HomeSectionHeader from "../molecules/home-section-header";
 import HomeSectionButton from "../atoms/home-section-button";
-import FeatCardGroup from "./feat-card-group";
+import ProjectCardGroup from "./project-card-group";
 import ProjectCard from "../molecules/project-card";
 
 type FeaturedProjectType = {
@@ -121,14 +121,18 @@ export default function FeatSection() {
             <ArrowUpRight className="size-4" data-icon="inline-end"/>
           </HomeSectionButton> 
         </HomeSectionHeader>
-        <FeatCardGroup>
+        <ProjectCardGroup
+          emptyStateIcon={Star}
+          emptyStateTitle="No Featured Products"
+          emptyStateDescription="You&apos;re all caught up. Featured products will appear here."
+        >
           {
             featuredProjects
               .filter(i => i.isFeatured)
               .slice(0, 4)
-              .map(i => <ProjectCard {...i}/>)
+              .map((i, index) => <ProjectCard key={index} {...i}/>)
           }
-        </FeatCardGroup>
+        </ProjectCardGroup>
       </div>
     </section>
   )

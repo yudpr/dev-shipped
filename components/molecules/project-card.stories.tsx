@@ -22,6 +22,17 @@ const featuredProject = {
  * 
  * All the badge here is defined in the same file as this
  * component, while ProjectVoting is imported.
+ * 
+ * As for the footer, as it can have more tags than the
+ * component can display, and to avoid uneven heights with
+ * other cards, it uses horizontal scroll fade, so instead 
+ * of hidden when overflowed, you can scroll horizontally
+ * to see each tags.
+ * 
+ * Title uses 1 line truncate and description uses 3 sized
+ * line-clamps to make heights consistent across cards, to
+ * avoid unnecessary details, while still have an appealing 
+ * visual.
  */
 
 const meta = {

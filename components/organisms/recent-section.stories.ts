@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
-import FeatCardGroup from "./feat-card-group";
-import ProjectCard from "../molecules/project-card";
+import RecentSection from "./recent-section";
 
 const featuredProjects = [
   {
@@ -32,26 +31,14 @@ const featuredProjects = [
   }
 ]
 
-/**
- * This is where we group project cards together in
- * featured section.
- */
-
 const meta = {
-  title: "Organisms/Feat Card Group",
-  component: FeatCardGroup,
-  args: {
-    children: (
-      <>
-        {featuredProjects.map(i => <ProjectCard {...i}/>)}
-      </>
-    )
-  },
+  title: "Organisms/Recent Section",
+  component: RecentSection,
   tags: ["autodocs"]
-} satisfies Meta<typeof FeatCardGroup>
+} satisfies Meta<typeof RecentSection>
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof FeatCardGroup>
+type Story = StoryObj<typeof RecentSection>
 
 export const Default = {} satisfies Story
