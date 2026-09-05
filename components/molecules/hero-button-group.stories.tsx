@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import HeroButtonGroup from "./hero-button-group";
-import HeroButton from "../atoms/hero-button";
+import CustomButton from "../atoms/custom-button";
 import { Share2, ArrowRight } from "lucide-react";
 
 /**
@@ -23,14 +23,14 @@ export const Default = {
   args: {
     children: (
       <>
-        <HeroButton href="/share">
+        <CustomButton href="/share">
           <Share2 data-icon="inline-start"/>
           Share Your Project
-        </HeroButton>
-        <HeroButton variant="secondary" href="/explore">
+        </CustomButton>
+        <CustomButton variant="secondary" href="/explore">
           Explore Projects
           <ArrowRight data-icon="inline-end"/>
-        </HeroButton>
+        </CustomButton>
       </>
     )
   }

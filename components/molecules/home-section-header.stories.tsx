@@ -1,12 +1,12 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import HomeSectionHeader from "./home-section-header";
-import HomeSectionButton from "../atoms/home-section-button";
+import CustomButton from "../atoms/custom-button";
 import { ArrowUpRight, Star } from "lucide-react";
 
 /**
  * This component has heading2, icon, and a paragraph,
  * that tells what each section about. You can pass
- * HomeSectionButton as a Link associated with the 
+ * CustomButton as a Link associated with the 
  * section.
  */
 
@@ -18,10 +18,10 @@ const meta = {
     title: "Featured Products",
     description: "Top picks from our community this week",
     children: (
-      <HomeSectionButton href="/explore">
+      <CustomButton href="/explore">
         View All
         <ArrowUpRight className="size-4" data-icon="inline-end"/>
-      </HomeSectionButton> )
+      </CustomButton> )
   },
   argTypes: {
     icon: {
@@ -34,7 +34,7 @@ const meta = {
       description: "Using paragraph element."
     },
     children: {
-      description: "Accepts HomeSectionButton"
+      description: "Accepts CustomButton"
     }
   },
   tags: ["autodocs"]

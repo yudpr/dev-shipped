@@ -1,6 +1,6 @@
 import { ArrowUpRight, Star } from "lucide-react";
 import HomeSectionHeader from "../molecules/home-section-header";
-import HomeSectionButton from "../atoms/home-section-button";
+import CustomButton from "../atoms/custom-button";
 import ProjectCardGroup from "./project-card-group";
 import ProjectCard from "../molecules/project-card";
 
@@ -116,10 +116,10 @@ export default function FeatSection() {
           title="Featured Products"
           description="Top picks from our community this week"
         >
-          <HomeSectionButton href="/explore">
+          <CustomButton href="/explore" variant="outline" intent="section-header" asLink>
             View All
             <ArrowUpRight className="size-4" data-icon="inline-end"/>
-          </HomeSectionButton> 
+          </CustomButton> 
         </HomeSectionHeader>
         <ProjectCardGroup
           emptyStateIcon={Star}
