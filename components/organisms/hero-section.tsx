@@ -3,7 +3,7 @@ import HeroBadge from "../atoms/hero-badge";
 import HeroHeading from "../atoms/hero-heading";
 import HeroParagraph from "../atoms/hero-paragraph";
 import HeroButtonGroup from "../molecules/hero-button-group";
-import HeroButton from "../atoms/hero-button";
+import CustomButton from "../atoms/custom-button";
 import { 
   Rocket,
   UsersRound,
@@ -45,14 +45,14 @@ export default function HeroSection() {
           <HeroHeading>Don&apos;t Let Your Code Gather Dust. DevShipped It</HeroHeading>
           <HeroParagraph>The community platform for developers and indie hackers to launch their apps, share side projects, and get real feedback through upvotes. Stop building in secret.</HeroParagraph>
           <HeroButtonGroup>
-            <HeroButton href="/share">
+            <CustomButton href="/share" size="lg" intent="hero" asLink>
               <Share2 data-icon="inline-start"/>
               Share Your Project
-            </HeroButton>
-            <HeroButton variant="secondary" href="/explore">
+            </CustomButton>
+            <CustomButton href="/explore" size="lg" variant="secondary" intent="hero" asLink>
               Explore Projects
               <ArrowRight data-icon="inline-end"/>
-            </HeroButton>
+            </CustomButton>
           </HeroButtonGroup>
           <HeroStatsGroup>
             { heroStatsItems.map((i, index) => <HeroStats key={`hero-stats-${index}`} {...i} />) }
