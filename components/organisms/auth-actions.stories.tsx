@@ -3,9 +3,10 @@ import AuthActions from "./auth-actions";
 
 /**
  * This component shows buttons/links depending of the
- * user auth state. If the user is authenticated, 
- * 'submit project' and user buttons will be visible. 
- * Otherwise, sign in link and sign up button.
+ * user auth state managed by clerk. If the user is 
+ * authenticated, 'submit project' and user buttons
+ * will be visible. Otherwise, sign in link and sign up 
+ * button.
  */
 
 
@@ -20,9 +21,3 @@ export default meta;
 type Story = StoryObj<typeof AuthActions>;
 
 export const Default = {} satisfies Story;
-
-export const Authenticated = {
-  args: {
-    hasAuth: true
-  }
-} satisfies Story;

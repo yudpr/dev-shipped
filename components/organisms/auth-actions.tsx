@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ComponentProps } from "react";
 import CustomButton from "../atoms/custom-button";
 import { Rocket } from "lucide-react";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";

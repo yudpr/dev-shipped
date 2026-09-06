@@ -12,7 +12,7 @@ const customButtonVariants = cva(
       intent: {
         hero: "text-base shadow-lg border-0",
         "section-header": "hidden sm:inline-flex ml-auto",
-        link: "bg-transparent hover:bg-tranparent cursor-pointer"
+        link: "bg-transparent hover:bg-transparent cursor-pointer"
       }
     }
   }
