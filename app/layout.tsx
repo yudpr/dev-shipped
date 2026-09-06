@@ -3,6 +3,7 @@ import { Outfit, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/organisms/header";
 import Footer from "@/components/organisms/footer";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -27,9 +28,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${outfit.variable} ${spaceMono.variable} font-sans h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Header />
-        {children}
-        <Footer />
+        <ClerkProvider>
+          <Header />
+          {children}
+          <Footer />
+        </ClerkProvider>
       </body>
     </html>
   );

@@ -11,7 +11,8 @@ const customButtonVariants = cva(
     variants: {
       intent: {
         hero: "text-base shadow-lg border-0",
-        "section-header": "hidden sm:inline-flex ml-auto"
+        "section-header": "hidden sm:inline-flex ml-auto",
+        link: "bg-transparent hover:bg-tranparent cursor-pointer"
       }
     }
   }
@@ -59,7 +60,7 @@ export default function CustomButton({
     )
   } else {
     const {asLink, ...rest} = props
-    
+
     return (
       <Button 
         className={cn(
