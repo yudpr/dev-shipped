@@ -44,7 +44,7 @@ export default function CustomButton({
 }: CustomButtonProps) {
 
   if (props.asLink) {
-    const {href, ...rest} = props
+    const {href, asLink, ...rest} = props
 
     return (
       <Link
@@ -58,6 +58,8 @@ export default function CustomButton({
       />
     )
   } else {
+    const {asLink, ...rest} = props
+    
     return (
       <Button 
         className={cn(
@@ -65,7 +67,7 @@ export default function CustomButton({
           customButtonVariants({ intent }),
           className
         )}
-        {...props}
+        {...rest}
       >
       </Button>
     )
