@@ -20,8 +20,8 @@ export default function ProjectCardGroup({
             ? children
             : <EmptyState
                 emptyStateDescription={emptyStateDescription}
-                emptyStateIcon={  emptyStateIcon}
-                emptyStateTitle={  emptyStateTitle}
+                emptyStateIcon={emptyStateIcon}
+                emptyStateTitle={emptyStateTitle}
               />
         }
     </div>

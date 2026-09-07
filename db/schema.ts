@@ -7,9 +7,12 @@ import {
   json,
   uniqueIndex,
   index,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 // ============= PROJECTS =============
+export const statusEnum = pgEnum("approval_status", ["pending", "approved", "rejected"]);
+
 export const projects = pgTable(
   "projects",
   {
@@ -31,7 +34,7 @@ export const projects = pgTable(
     // Metadata
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
-    status: varchar("status", { length: 20 }).default("pending"), // pending | approved | rejected
+    status: statusEnum("status").default("pending").notNull(), 
     submittedBy: varchar("submitted_by", { length: 120 }).default("anonymous"),
     userId: varchar("user_id", { length: 255 }), // Clerk user ID
 
