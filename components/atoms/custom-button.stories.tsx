@@ -11,9 +11,9 @@ import { ArrowUpRight } from "lucide-react";
  * styling via the original, 'variant' key. No default 
  * options are provided.
  * 
- * This button also has 'buttonType' key to select which 
- * button type to use, currently, there are 'link' and
- * the original 'button' type from shadcn.
+ * This button also has 'asLink' attribute to select 
+ * which button type to use, either as a 'link' or just
+ * a 'button' type.
  */
 
 const meta = {
