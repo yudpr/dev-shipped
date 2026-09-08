@@ -1,13 +1,14 @@
 import { Rocket } from "lucide-react";
 import HomeSectionHeader from "../molecules/home-section-header";
 import ProjectCardGroup from "./project-card-group";
-import ProjectCard from "../molecules/project-card";
-import { getRecentProjects } from "@/lib/projects/project-select";
 
+interface RecentSectionProps {
+  children?: React.ReactNode
+}
 
-export default async function RecentSection() {
-  const recentProjects = await getRecentProjects()
-  
+export default function RecentSection({
+  children  
+}: RecentSectionProps) {
   return (
     <section className="py-20">
       <div className="wrapper">
@@ -21,11 +22,7 @@ export default async function RecentSection() {
           emptyStateTitle="No Recent Launches"
           emptyStateDescription="You&apos;re all caught up. Recent Lauches will appear here."
         >
-          {
-            recentProjects
-              .slice(0, 5)
-              .map((i, index) => <ProjectCard key={index} {...i} />)
-          }
+          {children}
         </ProjectCardGroup>
       </div>
     </section>

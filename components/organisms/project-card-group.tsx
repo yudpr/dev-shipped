@@ -2,8 +2,9 @@ import React, { ComponentProps } from "react";
 import EmptyState from "../atoms/empty-state";
 
 interface ProjectCardGroupProps extends
-  ComponentProps<"div">,
-  ComponentProps<typeof EmptyState> {}
+  ComponentProps<typeof EmptyState> {
+    children?: React.ReactNode
+  }
 
 export default function ProjectCardGroup({
   children,

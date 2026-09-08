@@ -2,8 +2,7 @@ import { ComponentProps } from "react"
 import { LucideIcon } from "lucide-react"
 import { Card, CardTitle, CardContent } from "../ui/card"
 
-interface HeroStatsProps extends
-  ComponentProps<typeof Card> {
+interface HeroStatsProps {
   icon: LucideIcon,
   label: string,
   value: string

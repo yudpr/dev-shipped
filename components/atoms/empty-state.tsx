@@ -1,4 +1,3 @@
-import { ComponentProps } from "react";
 import { 
   Empty,
   EmptyContent,
@@ -10,8 +9,7 @@ import {
 import { LucideIcon, RefreshCcwIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
-interface EmptyStateProps extends 
-  ComponentProps<typeof Empty> {
+interface EmptyStateProps {
     emptyStateIcon: LucideIcon
     emptyStateTitle: string,
     emptyStateDescription: string,

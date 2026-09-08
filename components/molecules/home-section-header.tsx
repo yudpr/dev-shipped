@@ -1,11 +1,10 @@
 import { LucideIcon } from "lucide-react";
-import { ComponentProps } from "react";
 
-interface HomeSectionHeaderProps extends 
-  ComponentProps<"div"> {
+interface HomeSectionHeaderProps {
     icon: LucideIcon,
     title: string,
-    description: string
+    description: string,
+    children?: React.ReactNode
   }
 
 export default function HomeSectionHeader({

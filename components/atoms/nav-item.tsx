@@ -17,12 +17,12 @@ export default function NavItem({
   return (
     <NavigationMenuItem>
       <NavigationMenuLink 
-      href={href}
-      className={cn(
-        navigationMenuTriggerStyle(),
-        "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50",
-        className
-      )}
+        href={href}
+        className={cn(
+          navigationMenuTriggerStyle(),
+          "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50",
+          className
+        )}
       >
         <Icon />
         {children}
