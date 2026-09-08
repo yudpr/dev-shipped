@@ -1,3 +1,5 @@
+"use cache";
+
 import { getFeaturedProjects } from "@/lib/projects/project-select";
 import { getRecentProjects } from "@/lib/projects/project-select";
 import HomePageView from "./home-page.view";
