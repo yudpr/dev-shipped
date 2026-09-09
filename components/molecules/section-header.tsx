@@ -1,18 +1,18 @@
 import { LucideIcon } from "lucide-react";
 
-interface HomeSectionHeaderProps {
+interface SectionHeaderProps {
     icon: LucideIcon,
     title: string,
     description: string,
     children?: React.ReactNode
   }
 
-export default function HomeSectionHeader({
+export default function SectionHeader({
   description,
   icon: Icon,
   title,
   children
-}: HomeSectionHeaderProps) {
+}: SectionHeaderProps) {
   return (
     <div className="flex items-start mb-8" >
       <div className="mb-12">

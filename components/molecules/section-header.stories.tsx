@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
-import HomeSectionHeader from "./home-section-header";
+import SectionHeader from "./section-header";
 import CustomButton from "../atoms/custom-button";
 import { ArrowUpRight, Star } from "lucide-react";
 
@@ -11,8 +11,8 @@ import { ArrowUpRight, Star } from "lucide-react";
  */
 
 const meta = {
-  title: "Molecules/Home Section Header",
-  component: HomeSectionHeader,
+  title: "Molecules/Section Header",
+  component: SectionHeader,
   args: {
     icon: Star,
     title: "Featured Products",
@@ -38,10 +38,10 @@ const meta = {
     }
   },
   tags: ["autodocs"]
-} satisfies Meta<typeof HomeSectionHeader>
+} satisfies Meta<typeof SectionHeader>
 
 export default meta;
 
-type Story = StoryObj<typeof HomeSectionHeader>
+type Story = StoryObj<typeof SectionHeader>
 
 export const Default = {} satisfies Story

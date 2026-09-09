@@ -1,5 +1,5 @@
 import { ArrowUpRight, Star } from "lucide-react";
-import HomeSectionHeader from "../molecules/home-section-header";
+import SectionHeader from "../molecules/section-header";
 import CustomButton from "../atoms/custom-button";
 import ProjectCardGroup from "./project-card-group";
 import { getFeaturedProjects } from "@/lib/projects/project-select";
@@ -11,7 +11,7 @@ export default async function FeatSection() {
   return (
     <section className="py-20 bg-muted/20">
       <div className="wrapper">
-        <HomeSectionHeader 
+        <SectionHeader 
           icon={Star} 
           title="Featured Projects"
           description="Top picks from our community this week"
@@ -20,7 +20,7 @@ export default async function FeatSection() {
             View All
             <ArrowUpRight className="size-4" data-icon="inline-end"/>
           </CustomButton> 
-        </HomeSectionHeader>
+        </SectionHeader>
         <ProjectCardGroup
           emptyStateIcon={Star}
           emptyStateTitle="No Featured Projects"

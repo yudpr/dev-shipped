@@ -1,5 +1,5 @@
 import { Rocket } from "lucide-react";
-import HomeSectionHeader from "../molecules/home-section-header";
+import SectionHeader from "../molecules/section-header";
 import ProjectCardGroup from "./project-card-group";
 import { getRecentProjects } from "@/lib/projects/project-select";
 import ProjectCard from "../molecules/project-card";
@@ -10,7 +10,7 @@ export default function RecentSection() {
   return (
     <section className="py-20">
       <div className="wrapper">
-        <HomeSectionHeader
+        <SectionHeader
           title="Recently Launched"
           icon={Rocket}
           description="Discover the latest projects from out community"
