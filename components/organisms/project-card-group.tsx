@@ -2,8 +2,9 @@ import React, { ComponentProps } from "react";
 import EmptyState from "../atoms/empty-state";
 
 interface ProjectCardGroupProps extends
-  ComponentProps<"div">,
-  ComponentProps<typeof EmptyState> {}
+  ComponentProps<typeof EmptyState> {
+    children?: React.ReactNode
+  }
 
 export default function ProjectCardGroup({
   children,
@@ -13,6 +14,7 @@ export default function ProjectCardGroup({
 }: ProjectCardGroupProps) {
   const cleanChildren = React.Children.toArray(children);
   const hasChildren = React.Children.count(cleanChildren) > 0
+  
   return (
     <div className="grid-wrapper">
         {
@@ -20,8 +22,8 @@ export default function ProjectCardGroup({
             ? children
             : <EmptyState
                 emptyStateDescription={emptyStateDescription}
-                emptyStateIcon={  emptyStateIcon}
-                emptyStateTitle={  emptyStateTitle}
+                emptyStateIcon={emptyStateIcon}
+                emptyStateTitle={emptyStateTitle}
               />
         }
     </div>

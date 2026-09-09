@@ -16,6 +16,9 @@ const config: StorybookConfig = {
   "framework": "@storybook/nextjs-vite",
   "staticDirs": [
     "../public"
-  ]
+  ],
+  "features": {
+    "experimentalRSC": true
+  }
 };
 export default config;

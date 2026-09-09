@@ -4,10 +4,10 @@ import RecentSection from "../organisms/recent-section";
 
 export default function HomePage() {
   return (
-    <div>
+    <>
       <HeroSection />
       <FeatSection />
       <RecentSection />
-    </div>
-  )
+    </>
+  )  
 }

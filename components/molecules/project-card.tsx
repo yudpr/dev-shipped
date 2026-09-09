@@ -1,4 +1,3 @@
-import { ComponentProps } from "react";
 import { 
   Card, 
   CardHeader, 
@@ -11,29 +10,24 @@ import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { StarIcon } from "lucide-react";
 import ProjectVoting from "./project-voting";
+import { InferSelectModel } from "drizzle-orm";
+import { projects } from "@/db/schema";
 
-interface ProjectCardProps extends
-  ComponentProps<typeof Card> {
-    projectId: number
-    name: string
-    description: string
-    tags: string[]
-    votes: number
-    isFeatured: boolean,
-    href: string
+export interface ProjectCardProps extends
+  InferSelectModel<typeof projects> {
+    isFeatured?: boolean
   }
 
 export default function ProjectCard({
-  projectId,
+  id,
   name,
   description,
   tags,
-  votes,
-  isFeatured,
-  href="/"
+  voteCount,
+  isFeatured
 }: ProjectCardProps) {
   return (
-    <Link href={href}>
+    <Link href={`/projects/${id}`}>
       <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-44">
         <CardHeader className="has-data-[slot=card-description]:grid-rows-[max-content_1fr]">
           <CardTitle className="text-lg group-hover:text-primary transition-colors truncate">{name}</CardTitle>
@@ -43,20 +37,20 @@ export default function ProjectCard({
                 {
                   isFeatured && (
                       <Badge className="gap-1 bg-primary text-primary-foreground">
-                        <StarIcon data-icon="inline-start"/>
+                        <StarIcon data-icon="inline-start" className="size-3 fill-current"/>
                         Featured
                       </Badge>
                     )
                 }
               </div>
               <ProjectVoting 
-                votes={votes}
+                votes={voteCount}
                 hasVoted={false}
               />
           </CardAction>
         </CardHeader>
         <CardFooter className="gap-2 border-0 bg-transparent scroll-fade-x overflow-y-auto scrollbar-none mx-(--card-spacing) p-0">
-          {tags.map(i => <Badge key={i} variant="secondary">{i}</Badge>)}
+          {tags?.map(i => <Badge key={i} variant="secondary">{i}</Badge>)}
         </CardFooter>
       </Card>
     </Link>

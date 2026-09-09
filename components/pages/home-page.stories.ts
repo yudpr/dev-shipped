@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 import HomePage from "./home-page";
 
 /**

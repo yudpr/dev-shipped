@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import FeatSection from "./feat-section";
 
 /**
- * Featured Today Section
+ * Featured This Week Section
  */
 
 const meta = {

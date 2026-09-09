@@ -1,34 +1,58 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
-import ProjectCard from "../molecules/project-card";
+import ProjectCard, { type ProjectCardProps } from "../molecules/project-card";
 import ProjectCardGroup from "./project-card-group";
+import { Rocket } from "lucide-react";
 
-const featuredProjects = [
+const featuredProjects: ProjectCardProps[] = [
   {
-    projectId: 1,
+    id: 1,
     name: "ExampleProject1",
+    slug: "exampleproject1",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
-    href: "/",
-    votes: 123,
-    isFeatured: true
+    voteCount: 123,
+    createdAt: new Date(),
+    approvedAt: new Date(),
+    status: "approved",
+    submittedBy: "test@email.com",
+    websiteUrl: "https://www.example.com",
+    tagline: "Example Project Description",
+    isFeatured: true,
+    userId: null,
+    organizationId: null
   },
   {
-    projectId: 2,
+    id: 2,
     name: "ExampleProject2",
+    slug: "exampleproject2",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
-    href: "/",
-    votes: 123,
-    isFeatured: true
+    voteCount: 123,
+    createdAt: new Date(),
+    approvedAt: new Date(),
+    status: "approved",
+    submittedBy: "test@email.com",
+    websiteUrl: "https://www.example.com",
+    tagline: "Example Project Description",
+    isFeatured: false,
+    userId: null,
+    organizationId: null
   },
   {
-    projectId: 3,
+    id: 3,
     name: "ExampleProject3",
+    slug: "exampleproject3",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
-    href: "/",
-    votes: 123,
-    isFeatured: true
+    voteCount: 123,
+    createdAt: new Date(),
+    approvedAt: new Date(),
+    status: "approved",
+    submittedBy: "test@email.com",
+    websiteUrl: "https://www.example.com",
+    tagline: "Example Project Description",
+    userId: null,
+    organizationId: null
   }
 ]
 
@@ -56,6 +80,13 @@ type Story = StoryObj<typeof ProjectCardGroup>
 export const Default = {} satisfies Story
 export const Empty = {
   args: {
-    children: <></>
+    emptyStateDescription: "test description",
+    emptyStateIcon: Rocket,
+    emptyStateTitle: "test title",
+    children: (
+      <>
+      {featuredProjects.slice(0, 0).map(i => <ProjectCard {...i}/>)}
+      </>
+    )
   },
 } satisfies Story
