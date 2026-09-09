@@ -4,6 +4,7 @@ import ProjectCardGroup from "./project-card-group";
 import { getRecentProjects } from "@/lib/projects/project-select";
 import ProjectCard from "../molecules/project-card";
 import { Suspense } from "react";
+import SkeletonLoading from "../atoms/skeleton-loading";
 
 export default function RecentSection() {
   return (
@@ -14,7 +15,7 @@ export default function RecentSection() {
           icon={Rocket}
           description="Discover the latest projects from out community"
         />
-        <Suspense>
+        <Suspense fallback={<LoadingProjects />}>
           <RecentProjects />
         </Suspense>
       </div>
@@ -37,5 +38,13 @@ async function RecentProjects() {
           .map((i, index) => <ProjectCard key={index} {...i} />)
       }
     </ProjectCardGroup>
+  )
+}
+
+function LoadingProjects() {
+  return (
+    <div className="grid-wrapper">
+        {[...Array(5)].map((_, index) => <SkeletonLoading key={index} className="w-full h-44 rounded-xl"/>)}
+    </div>
   )
 }
