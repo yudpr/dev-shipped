@@ -2,15 +2,12 @@ import { ArrowUpRight, Star } from "lucide-react";
 import HomeSectionHeader from "../molecules/home-section-header";
 import CustomButton from "../atoms/custom-button";
 import ProjectCardGroup from "./project-card-group";
-import { ComponentProps } from "react";
+import { getFeaturedProjects } from "@/lib/projects/project-select";
+import ProjectCard from "../molecules/project-card";
 
-interface FeatSectionProps {
-  children?: React.ReactNode
-}
+export default async function FeatSection() {
+  const featuredProjects = await getFeaturedProjects()
 
-export default function FeatSection({
-  children
-}: FeatSectionProps) {
   return (
     <section className="py-20 bg-muted/20">
       <div className="wrapper">
@@ -29,7 +26,11 @@ export default function FeatSection({
           emptyStateTitle="No Featured Projects"
           emptyStateDescription="You&apos;re all caught up. Featured projects will appear here."
         >
-          {children}
+          {
+            featuredProjects
+              .slice(0, 5)
+              .map((i, index) => <ProjectCard key={index} {...i} isFeatured={true}/>)
+          }
         </ProjectCardGroup>
       </div>
     </section>

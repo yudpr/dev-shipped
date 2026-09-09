@@ -14,6 +14,7 @@ export default function ProjectCardGroup({
 }: ProjectCardGroupProps) {
   const cleanChildren = React.Children.toArray(children);
   const hasChildren = React.Children.count(cleanChildren) > 0
+  
   return (
     <div className="grid-wrapper">
         {

@@ -1,8 +1,11 @@
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { and, desc, eq, gte } from "drizzle-orm";
+import {  desc, eq, } from "drizzle-orm";
+import { connection } from "next/server";
 
 export async function getFeaturedProjects() {
+  "use cache";
+
   const projectsData = await db
     .select()
     .from(projects)
@@ -13,18 +16,23 @@ export async function getFeaturedProjects() {
   return projectsData
 }
 
-export async function getRecentProjects() {
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+export async function getAllProjects() {
   const projectsData = await db
     .select()
     .from(projects)
-    .where(
-      and(
-        eq(projects.status, "approved"),
-        gte(projects.createdAt, sevenDaysAgo) //get now up to 7 days before
-      )
-    )
-    .limit(5)
+    .where(eq(projects.status, "approved"))
+    .orderBy(desc(projects.createdAt))
+    .limit(10)
 
   return projectsData
+}
+
+export async function getRecentProjects() {
+  await connection()
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const projectsData = await getAllProjects()
+
+  return projectsData.filter(p => 
+    p.createdAt &&
+      new Date(p.createdAt) >= sevenDaysAgo)
 }
