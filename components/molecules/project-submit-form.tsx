@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Field, FieldGroup, FieldLabel, FieldError, FieldDescription } from "../ui/field";
 import { Input } from "../ui/input";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "../ui/input-group";
+import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "../ui/combobox";
+import React from "react";
 
 const formSchema = z.object({
   name: z 
@@ -226,6 +228,48 @@ function InputField({
             break;
           case "combobox":
             const { options } = content
+            const anchor = useComboboxAnchor()
+
+            children = (
+              <Combobox
+                multiple
+                autoHighlight
+                items={options}
+              >
+                <ComboboxChips
+                  ref={anchor}
+                  className="w-full max-w-xs"
+                >
+                  <ComboboxValue>
+                    {
+                      (values) => (
+                        <React.Fragment>
+                          {
+                            values.map((v: string) => (
+                              <ComboboxChip key={v}>{v}</ComboboxChip>
+                            ))
+                          }
+                          <ComboboxChipsInput placeholder={placeholder} />
+                        </React.Fragment>
+                      )
+                    }
+                  </ComboboxValue>
+                </ComboboxChips>
+                <ComboboxContent anchor={anchor}>
+                  <ComboboxEmpty>No items found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem 
+                        key={item} 
+                        value={item}
+                      >
+                        {item}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )
             break;
           default:
             break;
@@ -233,12 +277,12 @@ function InputField({
 
         return (
           <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={id}>{label}</FieldLabel>
-              { children }
-              { helper && <FieldDescription>{helper}</FieldDescription>}
-              { fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
-            </Field>
-          )
+            <FieldLabel htmlFor={id}>{label}</FieldLabel>
+            { children }
+            { helper && <FieldDescription>{helper}</FieldDescription>}
+            { fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
+          </Field>
+        )
       }}
     />
   )
