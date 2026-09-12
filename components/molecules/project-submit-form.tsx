@@ -1,13 +1,15 @@
 "use client";
 
 import * as z from "zod";
-import { useForm, Controller, UseFormReturn, ControllerProps, UseControllerReturn, FieldValues } from "react-hook-form";
+import { useForm, Controller, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Field, FieldGroup, FieldLabel, FieldError, FieldDescription } from "../ui/field";
 import { Input } from "../ui/input";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "../ui/input-group";
 import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "../ui/combobox";
 import React from "react";
+import { Button } from "../ui/button";
+import { Sparkle } from "lucide-react";
 
 const formSchema = z.object({
   name: z 
@@ -127,7 +129,7 @@ const formFieldContents: FormFieldContentType = {
     name: "tags",
     label: "Tags",
     required: true,
-    placeholder: "tag1, tag2, ...",
+    placeholder: "Select one or more tags",
     type: "combobox",
     helper: "Select the available tags from selection or add more using comma-separated tags (e.g., AI, SaaS, Productivity)",
     options: ["AI", "SaaS", "Productivity"],
@@ -147,13 +149,14 @@ export default function ProjectSubmitForm() {
     }
   })
 
-  function onSubmit() {
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    console.log(JSON.stringify(data))
     // toast
   }
 
   return (
     <div className="max-w-2xl mx-auto">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} id="project-submit-form" className="mb-5">
         <FieldGroup>
           {
             formFieldKeys.map((k, index) => (
@@ -162,6 +165,12 @@ export default function ProjectSubmitForm() {
           }
         </FieldGroup>
       </form>
+      <Field>
+        <Button type="submit" form="project-submit-form" size="lg">
+          <Sparkle className="size-4" data-icon="inline-end" />
+          Submit Project
+        </Button>
+      </Field>
     </div>
   )
 }
@@ -183,6 +192,8 @@ function InputField({
   },
   content
 }: InputFieldType) {
+  const anchor = useComboboxAnchor()
+
   return (
     <Controller
       control={form.control}
@@ -228,13 +239,14 @@ function InputField({
             break;
           case "combobox":
             const { options } = content
-            const anchor = useComboboxAnchor()
 
             children = (
               <Combobox
                 multiple
                 autoHighlight
                 items={options}
+                required
+                onValueChange={field.onChange}
               >
                 <ComboboxChips
                   ref={anchor}
