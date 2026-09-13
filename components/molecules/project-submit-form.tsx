@@ -1,15 +1,29 @@
 "use client";
 
 import * as z from "zod";
-import { useForm, Controller, UseFormReturn } from "react-hook-form";
+import { 
+  useForm,
+  Controller,
+  UseFormReturn
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Field, FieldGroup, FieldLabel, FieldError, FieldDescription } from "../ui/field";
+import { 
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldDescription
+} from "../ui/field";
 import { Input } from "../ui/input";
-import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "../ui/input-group";
-import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "../ui/combobox";
-import React from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupTextarea
+} from "../ui/input-group";
 import { Button } from "../ui/button";
 import { Sparkle } from "lucide-react";
+import ProjectTagsCombobox from "../atoms/project-tags-combobox";
 
 const formSchema = z.object({
   name: z 
@@ -192,8 +206,6 @@ function InputField({
   },
   content
 }: InputFieldType) {
-  const anchor = useComboboxAnchor()
-
   return (
     <Controller
       control={form.control}
@@ -241,46 +253,12 @@ function InputField({
             const { options } = content
 
             children = (
-              <Combobox
-                multiple
-                autoHighlight
-                items={options}
+              <ProjectTagsCombobox 
+                options={options}
+                placeholder={placeholder} 
                 required
                 onValueChange={field.onChange}
-              >
-                <ComboboxChips
-                  ref={anchor}
-                  className="w-full max-w-xs"
-                >
-                  <ComboboxValue>
-                    {
-                      (values) => (
-                        <React.Fragment>
-                          {
-                            values.map((v: string) => (
-                              <ComboboxChip key={v}>{v}</ComboboxChip>
-                            ))
-                          }
-                          <ComboboxChipsInput placeholder={placeholder} />
-                        </React.Fragment>
-                      )
-                    }
-                  </ComboboxValue>
-                </ComboboxChips>
-                <ComboboxContent anchor={anchor}>
-                  <ComboboxEmpty>No items found.</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem 
-                        key={item} 
-                        value={item}
-                      >
-                        {item}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
+              />
             )
             break;
           default:
@@ -299,3 +277,4 @@ function InputField({
     />
   )
 }
+
