@@ -24,6 +24,8 @@ import {
 import { Button } from "../ui/button";
 import { Sparkle } from "lucide-react";
 import ProjectTagsCombobox from "../atoms/project-tags-combobox";
+import { addProjectAction } from "@/lib/projects/project-actions";
+import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
   name: z 
@@ -150,8 +152,10 @@ const formFieldContents: FormFieldContentType = {
   }
 }
 
+export type ProjectSubmitFormData = z.infer<typeof formSchema>
+
 export default function ProjectSubmitForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProjectSubmitFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -164,9 +168,10 @@ export default function ProjectSubmitForm() {
   })
 
   
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(JSON.stringify(data))
+  async function onSubmit(data: ProjectSubmitFormData) {
+    await addProjectAction(data)
     // toast
+    // form reset if submitted successfully
   }
 
   return (
@@ -181,9 +186,18 @@ export default function ProjectSubmitForm() {
         </FieldGroup>
       </form>
       <Field>
-        <Button type="submit" form="project-submit-form" size="lg">
-          <Sparkle className="size-4" data-icon="inline-end" />
-          Submit Project
+        <Button type="submit" form="project-submit-form" size="lg" disabled={form.formState.isSubmitting}>
+          {
+            form.formState.isSubmitting
+              ? <>
+                  <Spinner className="size-4" data-icon="inline-start" />
+                  Submitting
+                </>
+              : <>
+                  <Sparkle className="size-4" data-icon="inline-start" />
+                  Submit Project        
+                </>
+          }
         </Button>
       </Field>
     </div>
@@ -191,7 +205,7 @@ export default function ProjectSubmitForm() {
 }
 
 interface InputFieldType {
-  form: UseFormReturn<z.infer<typeof formSchema>>,
+  form: UseFormReturn<ProjectSubmitFormData>,
   content: FormFieldContentType[keyof FormFieldContentType]
 }
 
