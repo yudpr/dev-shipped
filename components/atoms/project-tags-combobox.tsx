@@ -73,7 +73,7 @@ function useComboboxOptionsState(initOptions: string[]) {
    */
   const [ inputValue, setInputValue ] = useState("")
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const controlledInputValue = e.target.value
     const controlledInputValidation = optionsSchema
       .safeParse({ options: [...comboboxOptionsState, controlledInputValue] })
