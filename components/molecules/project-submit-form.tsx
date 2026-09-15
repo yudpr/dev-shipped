@@ -5,7 +5,6 @@ import {
   useForm,
   Controller,
   UseFormReturn,
-  useFieldArray
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { 
@@ -146,7 +145,7 @@ const formFieldContents: FormFieldContentType = {
     required: true,
     placeholder: "Select one or more tags",
     type: "combobox",
-    helper: "Select the available tags from selection or create and select your own tags.",
+    helper: "Select the available tags from selection or create and select your own tags",
     options: ["AI", "SaaS", "Productivity"],
   }
 }

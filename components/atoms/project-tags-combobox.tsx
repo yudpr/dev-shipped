@@ -1,4 +1,8 @@
-import React, { ComponentProps, useCallback, useState } from "react"
+import React, {
+  ComponentProps,
+  useCallback,
+  useState
+} from "react"
 import { 
   Combobox,
   ComboboxChip,
@@ -29,68 +33,105 @@ const optionsSchema = z.object({
     )
 })
 
-interface OptionsStateErrorTrue {
+interface ComboboxOptionsStateErrorTrue {
   invalid: true
   errors: z.ZodError["issues"]
 }
 
-interface OptionsStateErrorFalse {
+interface ComboboxOptionsStateErrorFalse {
   invalid: false
 }
 
-type OptionsStateError = OptionsStateErrorTrue | OptionsStateErrorFalse
+type ComboboxOptionsStateError = ComboboxOptionsStateErrorTrue | ComboboxOptionsStateErrorFalse
 
-function useOptionsState(options: string[]) {
-  const [ value, setValue ] = useState("")
-  const initValidation = optionsSchema.safeParse({ options })
-  const [ error, setError ] = useState<OptionsStateError>(() => {
-    if (!initValidation.success) {
+function useComboboxOptionsState(initOptions: string[]) {
+  /**
+   * Perform lazy initialization to insert intial options 
+   * value to combobox options state and initialize error 
+   * state based on that value validation.
+   */
+  const initOptionsValidation = optionsSchema.safeParse({ options: initOptions })
+  const [ error, setError ] = useState<ComboboxOptionsStateError>(() => {
+    if (!initOptionsValidation.success) {
       return {
         invalid: true,
-        errors: initValidation.error.issues
+        errors: initOptionsValidation.error.issues
       }
     }
     return { invalid: false }
   })
-  const [ state, setState ] = useState(() => {
-    if (!initValidation.success) {
+
+  const [ comboboxOptionsState, setComboboxOptionsState ] = useState(() => {
+    if (!initOptionsValidation.success) {
       return []
     }
-    return initValidation.data.options
+    return initOptionsValidation.data.options
   })
 
-  const setOptionsState = (newOption: string) => {
-    const validation = optionsSchema.safeParse({ options: [...state, newOption] })
-    if (!validation.success) {
-      setError({
-        invalid: true,
-        errors: validation.error.issues
-      })
-    } else {
-      setError({ invalid: false })
-      setState(validation.data.options)
-    }
-  }
+  /**
+   * Controll and validate input value against the existing options
+   */
+  const [ inputValue, setInputValue ] = useState("")
 
-  const setInputValue = (newValue: string)  => {
-    const validation = optionsSchema.safeParse({ options: [...state, newValue] })
-    if (!validation.success) {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
+    const controlledInputValue = e.target.value
+    const controlledInputValidation = optionsSchema
+      .safeParse({ options: [...comboboxOptionsState, controlledInputValue] })
+    if (!controlledInputValidation.success) {
       setError({
         invalid: true,
-        errors: validation.error.issues
+        errors: controlledInputValidation.error.issues
       })
     } else {
       setError({ invalid: false })
     } 
-    setValue(newValue)
-  }
+    setInputValue(controlledInputValue)
+  }, [comboboxOptionsState, setError, setInputValue])
+
+  /**
+   * Handle new combobox option creation through event listener
+   */
+  const createNewOption = useCallback((inputValue: string) => {
+    const newOptionValidation = optionsSchema
+      .safeParse({ options: [...comboboxOptionsState, inputValue] })
+
+    if (!newOptionValidation.success) {
+      setError({
+        invalid: true,
+        errors: newOptionValidation.error.issues
+      })
+    } else {
+      setError({ invalid: false })
+      setComboboxOptionsState(newOptionValidation.data.options)
+      setInputValue("")
+    }
+  }, [comboboxOptionsState, setError, setComboboxOptionsState, setInputValue])
+
+  const handleClick: ComponentProps<"button">["onClick"] = useCallback(() => {
+    createNewOption(inputValue)
+  }, [inputValue, createNewOption])
+
+  const handleKeydownEnter = useCallback((e: React.KeyboardEvent<HTMLInputElement> ) => {
+    if (e.key === "Enter") {
+      createNewOption(inputValue)
+    }
+  }, [inputValue, createNewOption])
 
   return {
-    options: state,
-    setOptions: setOptionsState,
-    ...error,
-    setInputValue,
-    inputValue: value
+    comboboxOptions: {
+      buttonElement: {
+        onClick: handleClick
+      },
+      inputElement: {
+        onChange: handleChange,
+        onKeyDown: handleKeydownEnter,
+        value: inputValue
+      }
+    },
+    comboboxOptionsState: {
+      ...error,
+      data: comboboxOptionsState
+    }
   }
 }
 
@@ -105,14 +146,14 @@ export default function ProjectTagsCombobox({
   placeholder,
   ...props
 }:ProjectTagsComboboxProps) {
-  const optionsState = useOptionsState(options)
+  const comboboxOptionsState = useComboboxOptionsState(options)
   const anchor = useComboboxAnchor()
 
   return (
     <Combobox
       multiple
       autoHighlight
-      items={optionsState.options}
+      items={comboboxOptionsState.comboboxOptionsState.data}
       {...props}
     >
       <ComboboxChips
@@ -146,61 +187,41 @@ export default function ProjectTagsCombobox({
             </ComboboxItem>
           )}
         </ComboboxList>
-        <CreateTagForm {...optionsState}/>
+        <CreateTagForm {...comboboxOptionsState}/>
       </ComboboxContent>
     </Combobox>    
   )
 }
 
-type CreateTagFormProps = ReturnType<typeof useOptionsState>
+type CreateTagFormProps = ReturnType<typeof useComboboxOptionsState>
 
 function CreateTagForm({ 
-  setOptions,
-  inputValue,
-  setInputValue,
-  ...props
+  comboboxOptions,
+  comboboxOptionsState
 }: CreateTagFormProps) {
-
-  const createTag = function () {
-    if (!inputValue || props.invalid) return
-    setOptions(inputValue)
-    setInputValue("")
-  }
-
-  const handleChange: ComponentProps<typeof InputGroupInput>["onChange"] = function (e){
-    setInputValue(e.target.value)
-  }
-
-  const handleKeydownEnter: ComponentProps<typeof InputGroupInput>["onKeyDown"]= function (e){
-    e.key === "Enter" && createTag()
-  }
-
-  const handleClick = function (){
-    createTag()
-  }
-
   return (
     <div className="m-2">
-      <Field data-invalid={props.invalid}>
+      <Field data-invalid={comboboxOptionsState.invalid}>
         <InputGroup>
           <InputGroupInput 
             placeholder="Create a tag" 
             autoComplete="off"
-            value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeydownEnter}
+            {...comboboxOptions.inputElement}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupButton 
               variant="secondary" 
               type="button"
-              onClick={handleClick}
+              {...comboboxOptions.buttonElement}
             >
               +
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
-        { props.invalid && <FieldError errors={props.errors}/>}
+        { 
+          comboboxOptionsState.invalid 
+            && <FieldError errors={comboboxOptionsState.errors}/>
+        }
       </Field>
     </div>
   )
