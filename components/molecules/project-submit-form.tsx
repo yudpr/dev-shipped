@@ -4,7 +4,8 @@ import * as z from "zod";
 import { 
   useForm,
   Controller,
-  UseFormReturn
+  UseFormReturn,
+  useFieldArray
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { 
@@ -145,7 +146,7 @@ const formFieldContents: FormFieldContentType = {
     required: true,
     placeholder: "Select one or more tags",
     type: "combobox",
-    helper: "Select the available tags from selection or add more using comma-separated tags (e.g., AI, SaaS, Productivity)",
+    helper: "Select the available tags from selection or create and select your own tags.",
     options: ["AI", "SaaS", "Productivity"],
   }
 }
@@ -163,6 +164,7 @@ export default function ProjectSubmitForm() {
     }
   })
 
+  
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(JSON.stringify(data))
     // toast
@@ -217,13 +219,13 @@ function InputField({
           case "input":
             children = (
               <Input
-                  {...field}
-                  id={id}
-                  aria-invalid={fieldState.invalid}
-                  placeholder={placeholder}
-                  required={required}
-                  autoComplete="off"
-                />
+                {...field}
+                id={id}
+                aria-invalid={fieldState.invalid}
+                placeholder={placeholder}
+                required={required}
+                autoComplete="off"
+              />
             )
             break;
           case "textarea":
@@ -251,7 +253,6 @@ function InputField({
             break;
           case "combobox":
             const { options } = content
-
             children = (
               <ProjectTagsCombobox 
                 options={options}
