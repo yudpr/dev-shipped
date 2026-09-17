@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "@/components/organisms/header";
 import Footer from "@/components/organisms/footer";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toast";
 
 const outfit = Outfit({
   subsets: ["latin"],
