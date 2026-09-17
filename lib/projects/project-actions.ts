@@ -1,8 +1,9 @@
 "use server";
-import { ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
+
+import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 
 type ActionResult =
-  | { success: true, message?: string, data?: {} }
+  | { success: true, message?: string, data?: Record<string, unknown> }
   | { success: false, error: string }
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {

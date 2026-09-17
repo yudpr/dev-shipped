@@ -26,6 +26,7 @@ import { Sparkle } from "lucide-react";
 import ProjectTagsCombobox from "../atoms/project-tags-combobox";
 import { addProjectAction } from "@/lib/projects/project-actions";
 import { Spinner } from "../ui/spinner";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z 
@@ -169,9 +170,28 @@ export default function ProjectSubmitForm() {
 
   
   async function onSubmit(data: ProjectSubmitFormData) {
-    await addProjectAction(data)
-    // toast
-    // form reset if submitted successfully
+    const result = await addProjectAction(data)
+
+    if (!result.success) {
+      toast.error(result.error, {
+        position: "bottom-right",
+        style: {
+          "--border-radius": "calc(var(--radius)  + 4px)",
+          "width": "fit-content",
+          "fontSize": "0.9rem"
+        } as React.CSSProperties
+      })
+      return
+    }
+
+    toast.success(result.message, {
+      position: "bottom-right",
+      style: {
+        "--border-radius": "calc(var(--radius)  + 4px)",
+        "width": "fit-content",
+        "fontSize": "0.9rem"
+      } as React.CSSProperties
+    })
   }
 
   return (
