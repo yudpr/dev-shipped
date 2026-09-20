@@ -71,9 +71,15 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
     formReactHook.setValue("slug", e.target.value)
   }, [ formReactHook ])
 
-  const [ debounceNoAutoFillSlug ] = useDebounce(formReactHook.getValues("slug"), 400)
+  const slugValue = useWatch({
+    control: formReactHook.control,
+    name: "slug"
+  })
+
+  const [ debounceNoAutoFillSlug ] = useDebounce(slugValue, 400)
 
   useEffect(() => {
+    if (autoFillEnabled) return
     (async () => {
       formReactHook.clearErrors("slug")
       /**
@@ -88,7 +94,7 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
       }
       await checkSlugAvailable(debounceNoAutoFillSlug) //this function needs to be at utmost bottom at least before any setValue calls to avoid insert failure
     })()
-  }, [ checkSlugAvailable, debounceNoAutoFillSlug, formReactHook ])
+  }, [ checkSlugAvailable, debounceNoAutoFillSlug, formReactHook, autoFillEnabled ])
 
 
   /**
