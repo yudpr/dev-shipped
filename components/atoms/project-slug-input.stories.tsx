@@ -8,7 +8,7 @@ import { formSchema } from "../molecules/project-submit-form.schema";
 const meta = {
   title: "Atoms/Project Slug Input",
   component: ProjectSlugInput,
-  render: (args) => {
+  render: () => {
     const form = useForm<ProjectSubmitFormData>({
       resolver: zodResolver(formSchema),
       defaultValues: {

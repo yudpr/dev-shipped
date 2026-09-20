@@ -1,15 +1,19 @@
-import { ComponentProps, useCallback, useEffect, useState } from "react";
+import React, { ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { Check, Lock, LockOpen, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { checkSlugAvailability } from "@/lib/projects/project-actions";
 import { UseFormReturn, useWatch } from "react-hook-form";
-import { ProjectSubmitFormData } from "../molecules/project-submit-form";
+import { type ProjectSubmitFormData } from "../molecules/project-submit-form";
 import { formSchema } from "../molecules/project-submit-form.schema";
 import { slugSchema } from "./project-slug-input.schema";
 import { Field, FieldDescription } from "../ui/field";
+import { useDebounce } from "use-debounce";
+import { Spinner } from "../ui/spinner";
 
 function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData>) {
+  const requestId = useRef(0) //Acting as staleness guard.
+
   /**
    * The following useState allows the user to enable or disable auto-fill slug
    * feature which reflects project name input value.
@@ -25,19 +29,34 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
    * message, and if booleans shows either slug available or none.
    */
   const [ isSlugAvailable, setIsSlugAvailable ] = useState<boolean | null>(null)
+  const [ isChecking, setIsChecking ] = useState(false)
 
   const checkSlugAvailable = useCallback(async (slug: string) => {
+    const id = ++requestId.current
+
     if (!slug) {
       setIsSlugAvailable(null)
+      setIsChecking(false)
       return
     }
-    const result = await checkSlugAvailability(slug)
-    if (!result.success) {
-      setIsSlugAvailable(false)
-      return
+    setIsChecking(true)
+    setIsSlugAvailable(null)
+
+    try {
+      const result = await checkSlugAvailability(slug)
+      
+      if (id !== requestId.current) return
+
+      setIsChecking(false)
+      setIsSlugAvailable(result.success)
+    } catch (error) {
+      if (id === requestId.current) {
+        formReactHook.setError("slug", { message:  "Network error occured. Please try again."})
+        setIsChecking(false)
+        setIsSlugAvailable(false)
+      }
     }
-    setIsSlugAvailable(true)
-  }, [])
+  }, [ formReactHook ])
 
 
   /**
@@ -49,21 +68,27 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
    * in the input.
    */
   const handleNoAutofillChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    /**
-     * Pick only slug, instead of all fields, then check if valid
-     */
-    const validateSlug = formSchema.pick({slug: true}).safeParse({ slug: e.target.value })
-    if (!validateSlug.success) {
-      formReactHook.setError("slug", { 
-        message: validateSlug.error.issues
-          .reduce((accumulator, issue) => accumulator + issue.message + "; ", "")
-      })
-    } else {
-      formReactHook.clearErrors("slug")
-    }
     formReactHook.setValue("slug", e.target.value)
-    await checkSlugAvailable(e.target.value) //this function needs to be at utmost bottom at least before any setValue calls to avoid insert failure
-  }, [ checkSlugAvailable, formReactHook ])
+  }, [ formReactHook ])
+
+  const [ debounceNoAutoFillSlug ] = useDebounce(formReactHook.getValues("slug"), 400)
+
+  useEffect(() => {
+    (async () => {
+      formReactHook.clearErrors("slug")
+      /**
+       * Pick only slug, instead of all fields, then check if valid
+       */
+      const validateSlug = formSchema.pick({slug: true}).safeParse({ slug: debounceNoAutoFillSlug })
+      if (!validateSlug.success) {
+        formReactHook.setError("slug", { 
+          message: validateSlug.error.issues
+            .reduce((accumulator, issue) => accumulator + issue.message + "; ", "")
+        })
+      }
+      await checkSlugAvailable(debounceNoAutoFillSlug) //this function needs to be at utmost bottom at least before any setValue calls to avoid insert failure
+    })()
+  }, [ checkSlugAvailable, debounceNoAutoFillSlug, formReactHook ])
 
 
   /**
@@ -77,14 +102,17 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
     name: "name"
   })
 
+  const [ debouncedSlug ] = useDebounce(projectNameValue, 400)
+
   useEffect(() => {
     if (!autoFillEnabled) return
     (async () => {
-      const validateSlug = slugSchema.safeParse({ slug: projectNameValue })
+      formReactHook.clearErrors("slug")
+      const validateSlug = slugSchema.safeParse({ slug: debouncedSlug })
       formReactHook.setValue("slug", validateSlug.data?.slug || "")
       await checkSlugAvailable(validateSlug.data?.slug || "")
     })()
-  }, [ autoFillEnabled, checkSlugAvailable, formReactHook, projectNameValue ])
+  }, [ autoFillEnabled, checkSlugAvailable, formReactHook, debouncedSlug ])
 
 
   return {
@@ -98,7 +126,8 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
     },
     slugLiveCheckingState: {
       isDisabled: autoFillEnabled,
-      isSlugAvailable
+      isSlugAvailable,
+      isChecking
     }
   }
 }
@@ -140,15 +169,19 @@ export default function ProjectSlugInput({
           </Button>
         </InputGroupAddon>
       </InputGroup>
-      <FieldDescription className="flex items-center gap-1 text-xs font-semibold">
-        {
-          slugLiveCheckingState.isSlugAvailable !== null && (
-            slugLiveCheckingState.isSlugAvailable
-              ? <><Check className="size-3 stroke-4 stroke-green-500"/> Slug is available</>
-              : <><X className="size-3 stroke-4 stroke-destructive"/> Slug is not available</>
-          )
-        }
-      </FieldDescription>
+      {
+        slugLiveCheckingState.isChecking
+          ? <SlugStatusViewer><Spinner className="size-3"/><span className="italic font-medium">Loading...</span></SlugStatusViewer>
+          : ( slugLiveCheckingState.isSlugAvailable !== null && (
+                slugLiveCheckingState.isSlugAvailable
+                  ? <SlugStatusViewer><Check className="size-3 stroke-4 stroke-green-500"/> Slug is available</SlugStatusViewer>
+                  : <SlugStatusViewer><X className="size-3 stroke-4 stroke-destructive"/> Slug is not available</SlugStatusViewer>
+            ))
+      }
     </Field>
   )
+}
+
+function SlugStatusViewer(props: ComponentProps<typeof FieldDescription>) {
+  return <FieldDescription className="flex items-center gap-1 text-xs font-semibold" {...props}/>
 }

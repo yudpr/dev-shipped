@@ -1,11 +1,11 @@
-export const addProjectAction = () => {
+export const addProjectAction = async () => {
   return { 
     success: true, 
     message: "Project submitted successfully. Your project will be reviewed shortly." 
   }
 }
 
-export const checkSlugAvailability = () => {
+export const checkSlugAvailability = async () => {
   return {
     success: true
   }

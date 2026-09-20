@@ -41,15 +41,15 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
  * check should not be cached, so no 'use cache' is used.
  */
 export const checkSlugAvailability = async (slug: string): Promise<ActionResult> => {
-  const value = "testtest"
+  await new Promise(r => setTimeout(r, 1000))
+  const value = [ "testtest", "testtesT"]
   console.log(slug)
-  if (slug !== value) {
+  if (!value.includes(slug)) {
     return {
       success: false,
       error: "Slug is not available"
     }
   }
-
   return {
     success: true,
     data: {
