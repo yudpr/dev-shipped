@@ -3,6 +3,7 @@ import { sb } from 'storybook/test'
 import '@/app/globals.css'
 
 sb.mock(import('../lib/projects/project-select.ts'))
+sb.mock(import('../lib/projects/project-actions.ts'))
 
 const preview: Preview = {
   parameters: {
