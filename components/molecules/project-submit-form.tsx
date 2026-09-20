@@ -28,6 +28,7 @@ import { addProjectAction } from "@/lib/projects/project-actions";
 import { Spinner } from "../ui/spinner";
 import { toast } from "../ui/toast";
 import { formSchema } from "./project-submit-form.schema";
+import ProjectSlugInput from "../atoms/project-slug-input";
 
 const formSchemaObj = formSchema.shape
 
@@ -59,6 +60,11 @@ interface ComboboxInputType extends
     options: string[],
   }
 
+interface SlugInputType extends
+  BaseFieldContentType {
+    type: "slug",
+  }
+
 type FormFieldContentType = {
   [K in FormFieldKeysType]:  
     & { id: K, name: K } 
@@ -66,6 +72,7 @@ type FormFieldContentType = {
         | TextInputType 
         | TextareaInputType 
         | ComboboxInputType
+        | SlugInputType
       )
 }
 
@@ -84,7 +91,7 @@ const formFieldContents: FormFieldContentType = {
     label: "Slug",
     required: true,
     placeholder: "my-awesome-project",
-    type: "input"
+    type: "slug"
   },
   tagline: {
     id: "tagline",
@@ -259,6 +266,18 @@ function InputField({
               />
             )
             break;
+          case "slug": 
+            children = (
+              <ProjectSlugInput 
+                {...field}
+                id={id}
+                aria-invalid={fieldState.invalid}
+                placeholder={placeholder}
+                required={required}
+                formReactHook={form}
+              />
+            )
+            break;
           default:
             break;
         }
@@ -275,4 +294,3 @@ function InputField({
     />
   )
 }
-

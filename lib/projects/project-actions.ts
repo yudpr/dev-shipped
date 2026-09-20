@@ -34,3 +34,26 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
     return { success: false, error: "Failed to submit project." }
   }
 }
+
+/**
+ * Live checking lives in client component so it needs to live as
+ * server action then will be imported to client component. Live
+ * check should not be cached, so no 'use cache' is used.
+ */
+export const checkSlugAvailability = async (slug: string): Promise<ActionResult> => {
+  const value = "testtest"
+  console.log(slug)
+  if (slug !== value) {
+    return {
+      success: false,
+      error: "Slug is not available"
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      slug: value
+    }
+  }
+}

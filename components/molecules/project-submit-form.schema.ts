@@ -9,9 +9,8 @@ export const formSchema = z.object({
     .string()
     .min(3, "Slug must be at least 3 characters")
     .max(100, "Slug must be at most 100")
-    // Enforce lowercase letters, numbers, and dashes only
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-      message: "Slug must be lowercase, alphanumeric, and contain no spaces (dashes only)",
+      message: "Slug must be lowercase alphanumeric characters separated by single hyphens, without leading or trailing dashes",
     }),
   tagline: z 
     .string()
