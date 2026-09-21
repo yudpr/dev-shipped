@@ -5,10 +5,17 @@ import { formSchema } from "@/components/molecules/project-submit-form.schema";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
 
 type ActionResult =
-  | { success: true, message?: string, data?: Record<string, unknown> }
   | { success: false, error: string }
+  | { 
+      success: true, 
+      message?: string, 
+      data?: {
+        isSlugAvailable?: boolean
+      }
+    }
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   try {
@@ -41,19 +48,20 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
  * check should not be cached, so no 'use cache' is used.
  */
 export const checkSlugAvailability = async (slug: string): Promise<ActionResult> => {
-  await new Promise(r => setTimeout(r, 1000))
-  const value = [ "testtest", "testtesT"]
-  console.log(slug)
-  if (!value.includes(slug)) {
-    return {
-      success: false,
-      error: "Slug is not available"
-    }
+  const validatedSlug = formSchema.pick({ slug: true }).safeParse({ slug })
+  if (!validatedSlug.success) {
+    return { success: false, error: validatedSlug.error.issues.map(i => i.message).join("; ") + "." }
   }
-  return {
-    success: true,
-    data: {
-      slug: value
-    }
+  try {
+    const result = await db
+      .select({ id: projects.id })
+      .from(projects)
+      .where(eq(projects.slug, slug))
+      .limit(1)
+
+    return { success: true, data: { isSlugAvailable: result.length === 0 } }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Database exception occured."}
   }
 }

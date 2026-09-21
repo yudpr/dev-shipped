@@ -48,7 +48,7 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
       if (id !== requestId.current) return
 
       setIsChecking(false)
-      setIsSlugAvailable(result.success)
+      result.success && setIsSlugAvailable(result?.data?.isSlugAvailable || false)
     } catch {
       if (id === requestId.current) {
         formReactHook.setError("slug", { message:  "Network error occured. Please try again."})
@@ -157,10 +157,10 @@ export default function ProjectSlugInput({
       <InputGroup>
         <InputGroupInput
           autoComplete="off"
-          aria-describedby="slug-status-viewer"
           {...props}
           {...slugLiveChecking.inputElement}
           disabled={ slugLiveCheckingState.isDisabled }
+          aria-describedby="slug-status-viewer"
         />
         <InputGroupAddon align="inline-end">
           <Button 
