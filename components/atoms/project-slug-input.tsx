@@ -49,7 +49,7 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
 
       setIsChecking(false)
       setIsSlugAvailable(result.success)
-    } catch (error) {
+    } catch {
       if (id === requestId.current) {
         formReactHook.setError("slug", { message:  "Network error occured. Please try again."})
         setIsChecking(false)
@@ -157,11 +157,12 @@ export default function ProjectSlugInput({
       <InputGroup>
         <InputGroupInput
           autoComplete="off"
+          aria-describedby="slug-status-viewer"
           {...props}
           {...slugLiveChecking.inputElement}
           disabled={ slugLiveCheckingState.isDisabled }
         />
-        <InputGroupAddon align="inline-end" className="z-50">
+        <InputGroupAddon align="inline-end">
           <Button 
             variant="link"
             title={ slugLiveCheckingState.isDisabled ? "Unlock to edit slug manually" : "Lock slug to match title"}
@@ -175,19 +176,23 @@ export default function ProjectSlugInput({
           </Button>
         </InputGroupAddon>
       </InputGroup>
-      {
-        slugLiveCheckingState.isChecking
-          ? <SlugStatusViewer><Spinner className="size-3"/><span className="italic font-medium">Loading...</span></SlugStatusViewer>
-          : ( slugLiveCheckingState.isSlugAvailable !== null && (
-                slugLiveCheckingState.isSlugAvailable
-                  ? <SlugStatusViewer><Check className="size-3 stroke-4 stroke-green-500"/> Slug is available</SlugStatusViewer>
-                  : <SlugStatusViewer><X className="size-3 stroke-4 stroke-destructive"/> Slug is not available</SlugStatusViewer>
-            ))
-      }
+      <FieldDescription 
+        id="slug-status-viewer"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="flex items-center gap-1 text-xs font-semibold"
+      >
+        {
+          slugLiveCheckingState.isChecking
+            ? <><Spinner className="size-3" aria-hidden="true"/><span className="italic font-medium">Loading...</span></>
+            : ( slugLiveCheckingState.isSlugAvailable !== null && (
+                  slugLiveCheckingState.isSlugAvailable
+                    ? <><Check className="size-3 stroke-4 stroke-green-500"/> Slug is available</>
+                    : <><X className="size-3 stroke-4 stroke-destructive"/> Slug is not available</>
+              ))
+        }
+      </FieldDescription>
     </Field>
   )
-}
-
-function SlugStatusViewer(props: ComponentProps<typeof FieldDescription>) {
-  return <FieldDescription className="flex items-center gap-1 text-xs font-semibold" {...props}/>
 }
