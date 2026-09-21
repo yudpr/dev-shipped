@@ -5,7 +5,6 @@ import { Button } from "../ui/button";
 import { checkSlugAvailability } from "@/lib/projects/project-actions";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { type ProjectSubmitFormData } from "../molecules/project-submit-form";
-import { formSchema } from "../molecules/project-submit-form.schema";
 import { slugSchema } from "./project-slug-input.schema";
 import { Field, FieldDescription } from "../ui/field";
 import { useDebounce } from "use-debounce";
@@ -68,8 +67,8 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
    * project name input value. These sources are toggled using auto-fill state.
    * The following logic controls input values from slug input component.
    * 
-   * formSchema validates the input. In this case, it validates every changes
-   * in the input.
+   * formSchema is used in checkSlugAvailability to validates the value coming from
+   * the slug or the project name.
    */
   const handleNoAutofillChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     formReactHook.setValue("slug", e.target.value)
@@ -86,17 +85,7 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
     if (autoFillEnabled) return
     (async () => {
       formReactHook.clearErrors("slug")
-      /**
-       * Pick only slug, instead of all fields, then check if valid
-       */
-      const validateSlug = formSchema.pick({slug: true}).safeParse({ slug: debounceNoAutoFillSlug })
-      if (!validateSlug.success) {
-        formReactHook.setError("slug", { 
-          message: validateSlug.error.issues
-            .reduce((accumulator, issue) => accumulator + issue.message + "; ", "")
-        })
-      }
-      await checkSlugAvailable(debounceNoAutoFillSlug) //this function needs to be at utmost bottom at least before any setValue calls to avoid insert failure
+      await checkSlugAvailable(debounceNoAutoFillSlug)
     })()
   }, [ checkSlugAvailable, debounceNoAutoFillSlug, formReactHook, autoFillEnabled ])
 

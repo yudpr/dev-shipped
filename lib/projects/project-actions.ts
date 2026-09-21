@@ -37,7 +37,7 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
 
     return { success: true, message: "Project submitted successfully. Your project will be reviewed shortly." }
   } catch(error) {
-    console.log(error)
+    console.error(error)
     return { success: false, error: "Failed to submit project." }
   }
 }
