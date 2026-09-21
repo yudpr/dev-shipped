@@ -147,7 +147,7 @@ export default function ProjectSlugInput({
   const { slugLiveChecking, slugLiveCheckingState } = useSlugLiveChecking(formReactHook)
   return (
     <Field>
-      <InputGroup>
+      <InputGroup className="has-disabled:opacity-100 has-disabled:bg-input/20">
         <InputGroupInput
           autoComplete="off"
           {...props}
@@ -155,7 +155,7 @@ export default function ProjectSlugInput({
           disabled={ slugLiveCheckingState.isDisabled }
           aria-describedby="slug-status-viewer"
         />
-        <InputGroupAddon align="inline-end">
+        <InputGroupAddon align="inline-end" className="group-data-[disabled=true]/input-group:opacity-100">
           <Button 
             variant="link"
             title={ slugLiveCheckingState.isDisabled ? "Unlock to edit slug manually" : "Lock slug to match title"}
