@@ -56,7 +56,7 @@ export const checkSlugAvailability = async (slug: string): Promise<ActionResult>
     const result = await db
       .select({ id: projects.id })
       .from(projects)
-      .where(eq(projects.slug, slug))
+      .where(eq(projects.slug, validatedSlug.data.slug))
       .limit(1)
 
     return { success: true, data: { isSlugAvailable: result.length === 0 } }
