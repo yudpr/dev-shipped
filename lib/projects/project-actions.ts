@@ -19,10 +19,14 @@ type ActionResult =
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
 
     if (!userId) {
       return { success: false, error: "You must be signed-in to submit." }
+    }
+
+    if (!orgId) {
+      return { success: false, error: "You must be a member of an organization to submit a project." }
     }
 
     const validatedData = formSchema.safeParse(data)
@@ -32,7 +36,8 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
     }
     await db.insert(projects).values({ 
       ...validatedData.data, 
-      userId
+      userId,
+      organizationId: orgId
     })
 
     return { success: true, message: "Project submitted successfully. Your project will be reviewed shortly." }
