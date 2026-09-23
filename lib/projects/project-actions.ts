@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 
 type ActionResult =
@@ -36,7 +35,7 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
     if (!targetOrgId) {
       shouldSyncWorkspace = true
 
-      const result = await createDefaultOrg(userId)
+      const result = await createDefaultOrg()
       if (!result.success) {
         return result
       }
@@ -108,8 +107,14 @@ export const checkSlugAvailability = async (slug: string): Promise<ActionResult>
  * If the user doesn't belong to an org, create an org dedicated 
  * for the users as the app needs them to belong to an org.
  */
-export const createDefaultOrg = async (userId: string): Promise<ActionResult> => {
+const createDefaultOrg = async (): Promise<ActionResult> => {
   try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, error: "You must be signed-in to submit." }
+    }
+
     const client = await clerkClient()
 
     const user = await client.users.getUser(userId)
