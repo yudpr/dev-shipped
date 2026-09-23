@@ -151,18 +151,14 @@ export default function ProjectSubmitForm() {
   async function onSubmit(data: ProjectSubmitFormData) {
     const result = await addProjectAction(data)
 
-    if (!result.success) {
+    if (!result?.success) {
       toast.add({
         type: "error",
-        description: result.error
+        description: result?.error ?? "Something went wrong"
       })  
-      return
     }
 
-    toast.add({
-      type: "success",
-      description: result.message
-    })
+    // Success submission will be redirected.
   }
 
   return (
