@@ -18,7 +18,6 @@ export default function SyncWorkspacePage() {
     }
   }, [isSuccess]);
 
-  // Set active newOrgId logic
-  
+  // Set active newOrgId logic will be implemented here.
   return <></>
 }

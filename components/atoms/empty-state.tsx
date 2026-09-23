@@ -1,3 +1,4 @@
+import { VariantProps } from "class-variance-authority";
 import { 
   Empty,
   EmptyContent,
@@ -6,37 +7,49 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "../ui/empty";
-import { LucideIcon, RefreshCcwIcon } from "lucide-react";
-import { Button } from "../ui/button";
+import { LucideIcon } from "lucide-react";
+import { ComponentProps } from "react";
+import { Spinner } from "../ui/spinner";
+import { cn } from "@/lib/utils";
 
-interface EmptyStateProps {
-    emptyStateIcon: LucideIcon
+interface EmptyStateProps extends
+  ComponentProps<typeof EmptyContent>,
+  VariantProps<typeof EmptyMedia> {
+    emptyStateIcon?: LucideIcon
     emptyStateTitle: string,
     emptyStateDescription: string,
+    mediaSpinner?: boolean
   }
 
 export default function EmptyState({
   emptyStateIcon: Icon,
   emptyStateDescription,
-  emptyStateTitle
+  emptyStateTitle,
+  variant = "default",
+  mediaSpinner = false,
+  ...props
 }: EmptyStateProps) {
   return (
-    <Empty className="empty-state col-span-full">
+    <Empty 
+      className={cn(
+        "col-span-full", 
+        !mediaSpinner && "empty-state"
+      )}
+    >
       <EmptyHeader>
-        <EmptyMedia variant="default">
-          <Icon />
+        <EmptyMedia variant={variant}>
+          {
+            mediaSpinner
+            ? <Spinner className="size-10"/>
+            : Icon && <Icon/>
+          }
         </EmptyMedia>
         <EmptyTitle>{emptyStateTitle}</EmptyTitle>
         <EmptyDescription className="max-w-xs text-pretty">
           {emptyStateDescription}
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
-        <Button variant="outline">
-          <RefreshCcwIcon data-icon="inline-start" />
-          Refresh
-        </Button>
-      </EmptyContent>
+      <EmptyContent {...props} />
     </Empty>
   )
 }
