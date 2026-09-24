@@ -13,12 +13,12 @@ import { Spinner } from "../ui/spinner";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps extends
-  ComponentProps<typeof EmptyContent>,
   VariantProps<typeof EmptyMedia> {
     emptyStateIcon?: LucideIcon
     emptyStateTitle: string,
     emptyStateDescription: string,
     mediaSpinner?: boolean
+    children?: ComponentProps<typeof EmptyContent>["children"]
   }
 
 export default function EmptyState({
@@ -27,7 +27,7 @@ export default function EmptyState({
   emptyStateTitle,
   variant = "default",
   mediaSpinner = false,
-  ...props
+  children = null
 }: EmptyStateProps) {
   return (
     <Empty 
@@ -49,7 +49,7 @@ export default function EmptyState({
           {emptyStateDescription}
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent {...props} />
+      <EmptyContent children={children} />
     </Empty>
   )
 }

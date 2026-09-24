@@ -29,6 +29,7 @@ import { Spinner } from "../ui/spinner";
 import { toast } from "../ui/toast";
 import { formSchema } from "./project-submit-form.schema";
 import ProjectSlugInput from "../atoms/project-slug-input";
+import { useRouter } from "next/navigation";
 
 const formSchemaObj = formSchema.shape
 
@@ -146,7 +147,7 @@ export default function ProjectSubmitForm() {
       tags: []
     }
   })
-
+  const router = useRouter()
   
   async function onSubmit(data: ProjectSubmitFormData) {
     const result = await addProjectAction(data)
@@ -156,9 +157,20 @@ export default function ProjectSubmitForm() {
         type: "error",
         description: result?.error ?? "Something went wrong"
       })  
+      return
     }
+    
+    toast.add({
+      type: "success",
+      description: "Project submitted successfully. Your project will be reviewed shortly."
+    })
 
-    // Success submission will be redirected.
+    if (result.data?.sync?.shouldSyncWorkspace) {
+      router.replace('/sync-workspace?orgId=' + result.data.sync.newOrgId)
+    } else {
+      router.replace('/')
+    }
+    
   }
 
   return (

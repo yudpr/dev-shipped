@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
 
 type ActionResult =
   | { success: false, error: string }
@@ -14,14 +13,24 @@ type ActionResult =
       success: true, 
       message?: string, 
       data?: {
-        isSlugAvailable?: boolean,
-        newOrgId?: string
-      }
+        isSlugAvailable?: boolean,   
+        sync?: SyncWorkspaceData
+      } 
     }
 
-export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult | void> => {
+type SyncWorkspaceData = 
+  | { 
+      shouldSyncWorkspace: true 
+      newOrgId: string
+    }
+  | { 
+      shouldSyncWorkspace?: false 
+      newOrgId?: never
+    }
+
+export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   let targetOrgId: string | null | undefined = null
-  let shouldSyncWorkspace = false 
+  let shouldSyncWorkspace = false
 
   try {
     const { userId, orgId } = await auth();
@@ -33,21 +42,20 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
     }
 
     if (!targetOrgId) {
-      shouldSyncWorkspace = true
-
       const result = await createDefaultOrg()
       if (!result.success) {
         return result
       }
       
-      if (!result.data?.newOrgId){
+      if (!result.data?.sync?.shouldSyncWorkspace || !result.data.sync.newOrgId ){
         return {
           success: false,
           error: "Organization context is missing."
         }
       }
 
-      targetOrgId = result.data.newOrgId
+      targetOrgId = result.data.sync.newOrgId
+      shouldSyncWorkspace = result.data.sync.shouldSyncWorkspace
     }
 
     const validatedData = formSchema.safeParse(data)
@@ -61,21 +69,22 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
       organizationId: targetOrgId
     })
 
-    /**
-     * Success action will be redirected.
-     */
+    if (shouldSyncWorkspace) {
+      return {
+        success: true,
+        data: {
+          sync: {
+            newOrgId: targetOrgId,
+            shouldSyncWorkspace: true
+          }
+        }
+      }
+    }
+
+    return { success: true }
   } catch(error) {
     console.error(error)
     return { success: false, error: "Failed to submit project." }
-  }
-
-  /**
-   * redirect should exist outside try/catch block.
-   */
-  if (shouldSyncWorkspace) {
-    redirect("/sync-workspace?success=true") 
-  } else {
-    redirect("/?success=true")
   }
 }
 
@@ -145,7 +154,10 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
     return {
       success: true,
       data: {
-        newOrgId: newOrg.id
+        sync: {
+          newOrgId: newOrg.id,
+          shouldSyncWorkspace: true
+        }
       }
     }
   } catch (error) {
