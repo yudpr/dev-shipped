@@ -37,11 +37,6 @@ export default function SyncWorkspacePage() {
     if (userMemberships.data && userMemberships.data.length > 0) {
       const orgToActivate = newOrgId || userMemberships.data[0].organization.id
 
-      if (!orgToActivate) {
-        setErrorState(true)
-        return
-      }
-
       setActive({ organization: orgToActivate })
         .then(() => { 
           /**
