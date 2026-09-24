@@ -1,3 +1,4 @@
+import Footer from "../organisms/footer";
 import Header from "../organisms/header";
 import SubmitSection from "../organisms/submit-section";
 
@@ -6,6 +7,7 @@ export default function SubmitPage() {
     <>
       <Header />
       <SubmitSection />
+      <Footer />
     </>
   )
 }

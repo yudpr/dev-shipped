@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Space_Mono } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/organisms/footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/toast";
 
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
           {children}
-          <Footer />
           <Toaster />
         </ClerkProvider>
       </body>
