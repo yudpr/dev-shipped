@@ -1,8 +1,13 @@
 import CustomButton from "../atoms/custom-button";
 import { Rocket } from "lucide-react";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import {
+  Show,
+  SignInButton,
+  SignUpButton,
+} from "@clerk/nextjs";
 import { Suspense } from "react";
 import SkeletonLoading from "../atoms/skeleton-loading";
+import ClerkUserButton from "../atoms/clerk-user-button";
 
 function LoadingAuthActions() {
   return (
@@ -22,9 +27,7 @@ export default function AuthActions() {
             <Rocket data-icon="inline-start"/>
             Submit Project
           </CustomButton>
-          <div className="size-7">
-            <UserButton />
-          </div>
+          <ClerkUserButton />
         </Show>
         <Show when="signed-out">
           <SignInButton>

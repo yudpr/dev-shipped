@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Outfit, Space_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/organisms/header";
-import Footer from "@/components/organisms/footer";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/toast";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -29,9 +28,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
-          <Header />
           {children}
-          <Footer />
+          <Toaster />
         </ClerkProvider>
       </body>
     </html>
