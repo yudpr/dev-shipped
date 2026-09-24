@@ -49,7 +49,9 @@ export default function EmptyState({
           {emptyStateDescription}
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent children={children} />
+      <EmptyContent>
+        {children}
+      </EmptyContent>
     </Empty>
   )
 }

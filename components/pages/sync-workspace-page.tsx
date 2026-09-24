@@ -17,6 +17,7 @@ export default function SyncWorkspacePage() {
   });
   const router = useRouter();
   const searchParams = useSearchParams()
+  const newOrgId = searchParams.get("orgId")
   const [errorState, setErrorState] = useState(false);
 
   useEffect(() => {
@@ -32,10 +33,16 @@ export default function SyncWorkspacePage() {
       router.replace('/')
       return
     }
-    const newOrgId = searchParams.get("orgId")
 
     if (userMemberships.data && userMemberships.data.length > 0) {
-      setActive({ organization: newOrgId })
+      const orgToActivate = newOrgId || userMemberships.data[0].organization.id
+
+      if (!orgToActivate) {
+        setErrorState(true)
+        return
+      }
+
+      setActive({ organization: orgToActivate })
         .then(() => { 
           /**
            * Continue if success.
@@ -57,7 +64,7 @@ export default function SyncWorkspacePage() {
     }, 3000)
 
     return () => clearTimeout(timeout);
-  }, [isLoaded, orgId, userMemberships.data, setActive, router, searchParams]);
+  }, [isLoaded, orgId, userMemberships.data, setActive, router, newOrgId]);
 
   if (errorState) {
     return (
