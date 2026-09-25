@@ -37,6 +37,7 @@ export default function ProjectVotingButton({
       className={cn(
         buttonVariants({size, variant}),
         projectVotingButtonVariants({intent}),
+        "relative z-10",
         className
       )} {...props}/>
   )

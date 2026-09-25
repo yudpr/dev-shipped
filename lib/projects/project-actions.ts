@@ -3,9 +3,9 @@
 import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 import { formSchema } from "@/components/molecules/project-submit-form.schema";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 type ActionResult =
   | { success: false, error: string }
@@ -166,5 +166,34 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
       success: false,
       error: "Could not configure your organization workspace. Please try again."
     }
+  }
+}
+type VoteType = "up" | "down"
+
+export const projectVotingAction = async (projectId: number, incomingVoteType: VoteType): Promise<ActionResult> => {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return { success: false, error: "You must be signed-in to submit." }
+    }
+    
+    /**
+     * Look for an existing vote from the user.
+     */
+    const existingVote = await db
+      .select({ voteType: votes.voteType })
+      .from(votes)
+      .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+      .limit(1)
+      .then((rows) => rows[0]) // unpack that one data from array
+    
+    console.log(existingVote)
+
+    // Logic for adding, substracting, or deleting votes will be implemented here soon
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Could not sync your vote with our database servers." }
   }
 }

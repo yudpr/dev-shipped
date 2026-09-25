@@ -1,27 +1,48 @@
+"use client";
+
 import { ComponentProps } from "react";
-import { Button } from "../ui/button";
 import ProjectVotingButton from "../atoms/project-voting-button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { projectVotingAction } from "@/lib/projects/project-actions";
 
 interface ProjectVotingProps extends
   ComponentProps<"div"> {
     votes: number
     hasVoted: boolean
+    projectId: number
   }
 
 export default function ProjectVoting({
   votes,
   hasVoted,
-  className
+  className,
+  projectId
 }: ProjectVotingProps) {
+  const upvoteHandler = async () => {
+    const result = projectVotingAction(projectId, "up")
+    // Optimistic update will be implemented soon
+  }
+
+  const downvoteHandler = async () => {
+    const result = projectVotingAction(projectId, "down")
+    // Optimistic update will be implemented soon
+  }
   return (
     <div className={cn("flex flex-col w-fit items-center", className)}>
-      <ProjectVotingButton hasVoted={hasVoted} intent="up-vote">
+      <ProjectVotingButton 
+        hasVoted={hasVoted} 
+        intent="up-vote"
+        onClick={upvoteHandler}
+      >
         <ChevronUp className="size-5"/>
       </ProjectVotingButton>
       <span className="text-sm font-semibold transition-colors text-foreground">{votes}</span>
-      <ProjectVotingButton hasVoted={hasVoted} intent="down-vote">
+      <ProjectVotingButton 
+        hasVoted={hasVoted} 
+        intent="down-vote"
+        onClick={downvoteHandler}
+        >
         <ChevronDown className="size-5"/>
       </ProjectVotingButton>
     </div>
