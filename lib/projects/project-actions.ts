@@ -172,6 +172,8 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
 
 type VoteType = "up" | "down"
 
+const ALLOWED_PATHS = ['/'];
+
 export const projectVotingAction = async (
   projectId: number, 
   incomingVoteType: VoteType, 
@@ -183,16 +185,13 @@ export const projectVotingAction = async (
     if (!userId) {
       return { success: false, error: "You must be signed-in to submit." }
     }
-    
+
     /**
-     * Look for an existing vote from the user.
+     * Route validation guard rails to prevent malicious cache churn
      */
-    const existingVote = await db
-      .select({ voteType: votes.voteType })
-      .from(votes)
-      .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
-      .limit(1)
-      .then((rows) => rows[0]) // unpack that one data from array
+    if (!ALLOWED_PATHS.includes(currentPath)) {
+      return { success: false, error: "Invalid routing context configuration." }
+    }
     
     /**
      * Keep database atomic by using transaction because this action needs to
@@ -200,6 +199,19 @@ export const projectVotingAction = async (
      * vote type.
      */
     await db.transaction(async (tx) => {
+    /**
+     * Look for an existing vote from the user. Moving this inside tx to avoid
+     * race condition where the user might double-clicks rapidly but returned
+     * no vote exists by existingVote because tx is failed to lock the reading
+     * row.
+     */
+    const existingVote = await tx
+      .select({ voteType: votes.voteType })
+      .from(votes)
+      .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+      .limit(1)
+      .then((rows) => rows[0]) // unpack that one data from array
+
       /**
        * Undo vote if the user click the same button as the existing vote.
        */
@@ -211,7 +223,7 @@ export const projectVotingAction = async (
         const modifier = incomingVoteType === "up"? -1 : 1
         await tx
           .update(projects)
-          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .set({ voteCount: sql`vote_count + ${modifier}` }) // Removed GREATEST() to let math calculate correctly across 0 thresholds
           .where(eq(projects.id, projectId))
 
       /**
@@ -226,7 +238,7 @@ export const projectVotingAction = async (
         const modifier = incomingVoteType === "up"? 2 : -2
         await tx
           .update(projects)
-          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .set({ voteCount: sql`vote_count + ${modifier}` })
           .where(eq(projects.id, projectId))
 
       /**
@@ -244,7 +256,7 @@ export const projectVotingAction = async (
         const modifier = incomingVoteType === "up"? 1 : -1
         await tx
           .update(projects)
-          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .set({ voteCount: sql`vote_count + ${modifier}` })
           .where(eq(projects.id, projectId))
       }
     })
