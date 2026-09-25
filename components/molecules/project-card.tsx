@@ -49,7 +49,7 @@ export default function ProjectCard({
             />
         </CardAction>
       </CardHeader>
-      <CardFooter className="gap-2 border-0 bg-transparent scroll-fade-x overflow-y-auto scrollbar-none mx-(--card-spacing) p-0">
+      <CardFooter className="gap-2 border-0 bg-transparent scroll-fade-x overflow-y-auto scrollbar-none mx-(--card-spacing) p-0 relative z-10">
         {tags?.map(i => <Badge key={i} variant="secondary">{i}</Badge>)}
       </CardFooter>
       <Link href={`/projects/${id}`} className="absolute inset-0 z-0">

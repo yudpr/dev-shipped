@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 type ActionResult =
   | { success: false, error: string }
@@ -168,9 +169,14 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
     }
   }
 }
+
 type VoteType = "up" | "down"
 
-export const projectVotingAction = async (projectId: number, incomingVoteType: VoteType): Promise<ActionResult> => {
+export const projectVotingAction = async (
+  projectId: number, 
+  incomingVoteType: VoteType, 
+  currentPath: string
+): Promise<ActionResult> => {
   try {
     const { userId } = await auth()
 
@@ -188,9 +194,65 @@ export const projectVotingAction = async (projectId: number, incomingVoteType: V
       .limit(1)
       .then((rows) => rows[0]) // unpack that one data from array
     
-    console.log(existingVote)
+    /**
+     * Keep database atomic by using transaction because this action needs to
+     * mutate two tables at the same execution, projects' vote count and votes'
+     * vote type.
+     */
+    await db.transaction(async (tx) => {
+      /**
+       * Undo vote if the user click the same button as the existing vote.
+       */
+      if (existingVote && existingVote.voteType === incomingVoteType) {
+        await tx
+          .delete(votes)
+          .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+        
+        const modifier = incomingVoteType === "up"? -1 : 1
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .where(eq(projects.id, projectId))
 
-    // Logic for adding, substracting, or deleting votes will be implemented here soon
+      /**
+       * Direct change if the user clicked the opposite button as the existing vote.
+       */
+      } else if ( existingVote && existingVote.voteType !== incomingVoteType) {
+        await tx
+          .update(votes)
+          .set({ voteType: incomingVoteType })
+          .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+        
+        const modifier = incomingVoteType === "up"? 2 : -2
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .where(eq(projects.id, projectId))
+
+      /**
+       * Brand new vote if the existing vote is none.
+       */
+      } else {
+        await tx
+          .insert(votes)
+          .values({
+            projectId,
+            userId,
+            voteType: incomingVoteType
+          })
+
+        const modifier = incomingVoteType === "up"? 1 : -1
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`GREATEST(0, vote_count + ${modifier})` })
+          .where(eq(projects.id, projectId))
+      }
+    })
+
+    /**
+     * Clear cache to reflect changes on the specified path.
+     */
+    revalidatePath(currentPath)
     return { success: true }
   } catch (error) {
     console.error(error)
