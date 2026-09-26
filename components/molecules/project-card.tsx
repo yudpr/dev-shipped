@@ -11,11 +11,18 @@ import { Badge } from "../ui/badge";
 import { StarIcon } from "lucide-react";
 import ProjectVoting from "./project-voting";
 import { InferSelectModel } from "drizzle-orm";
-import { projects } from "@/db/schema";
+import { projects, votes } from "@/db/schema";
 
 export interface ProjectCardProps extends
-  InferSelectModel<typeof projects> {
-    isFeatured?: boolean
+  Pick<InferSelectModel<typeof projects>, 
+    | "id" 
+    | "name" 
+    | "description"
+    | "tags"
+    | "voteCount"
+  > {
+    isFeatured?: boolean,
+    userVote: InferSelectModel<typeof votes>["voteType"] | null
   }
 
 export default function ProjectCard({
@@ -24,7 +31,8 @@ export default function ProjectCard({
   description,
   tags,
   voteCount,
-  isFeatured
+  isFeatured,
+  userVote
 }: ProjectCardProps) {
   return (
     <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-44 relative">
@@ -44,7 +52,7 @@ export default function ProjectCard({
             </div>
             <ProjectVoting 
               votes={voteCount}
-              hasVoted={false}
+              userVote={userVote}
               projectId={id}
             />
         </CardAction>

@@ -4,10 +4,11 @@ import CustomButton from "../atoms/custom-button";
 import ProjectCardGroup from "./project-card-group";
 import { getFeaturedProjects } from "@/lib/projects/project-select";
 import ProjectCard from "../molecules/project-card";
+import { auth } from "@clerk/nextjs/server";
+import { Suspense } from "react";
+import SkeletonLoading from "../atoms/skeleton-loading";
 
 export default async function FeatSection() {
-  const featuredProjects = await getFeaturedProjects()
-
   return (
     <section className="py-20 bg-muted/20">
       <div className="wrapper">
@@ -21,18 +22,41 @@ export default async function FeatSection() {
             <ArrowUpRight className="size-4" data-icon="inline-end"/>
           </CustomButton> 
         </SectionHeader>
-        <ProjectCardGroup
-          emptyStateIcon={Star}
-          emptyStateTitle="No Featured Projects"
-          emptyStateDescription="You&apos;re all caught up. Featured projects will appear here."
-        >
-          {
-            featuredProjects
-              .slice(0, 5)
-              .map((i, index) => <ProjectCard key={index} {...i} isFeatured={true}/>)
-          }
-        </ProjectCardGroup>
+        <Suspense fallback={<LoadingProjects />}>
+          <FeatProjects/>
+        </Suspense>
       </div>
     </section>
+  )
+}
+
+async function FeatProjects(){
+  /**
+   * auth needs to be here because getFeaturedProjects is cached.
+   * Next.js recommends to not cache auth.
+   */
+  const { userId } = await auth()  
+  const featuredProjects =  await getFeaturedProjects(userId)
+
+  return (
+    <ProjectCardGroup
+      emptyStateIcon={Star}
+      emptyStateTitle="No Featured Projects"
+      emptyStateDescription="You&apos;re all caught up. Featured projects will appear here."
+    >
+      {
+        featuredProjects
+          .slice(0, 5)
+          .map((i, index) => <ProjectCard key={index} {...i} isFeatured={true}/>)
+      }
+    </ProjectCardGroup>
+  )
+}
+
+function LoadingProjects() {
+  return (
+    <div className="grid-wrapper">
+        {[...Array(5)].map((_, index) => <SkeletonLoading key={index} className="w-full h-44 rounded-xl"/>)}
+    </div>
   )
 }

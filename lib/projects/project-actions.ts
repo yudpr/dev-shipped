@@ -200,10 +200,14 @@ export const projectVotingAction = async (
      */
     await db.transaction(async (tx) => {
     /**
-     * Look for an existing vote from the user. Moving this inside tx to avoid
-     * race condition where the user might double-clicks rapidly but returned
-     * no vote exists by existingVote because tx is failed to lock the reading
-     * row.
+     * Look for an existing vote from the user. Executing this inside the 
+     * transaction block narrows the concurrency window, which earlier the app
+     * opens 2 connections, select query connection and mutate connection with tx. 
+     * 
+     * This creates more time gaps which a rapid double-click might cause double
+     * writes that go to the same if branch. If it still bypasses this check, 
+     * the database schema's Unique Index constraint will reject the duplicate insert 
+     * and safely roll back the transaction.
      */
     const existingVote = await tx
       .select({ voteType: votes.voteType })

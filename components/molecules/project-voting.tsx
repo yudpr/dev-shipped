@@ -10,13 +10,13 @@ import { usePathname } from "next/navigation";
 interface ProjectVotingProps extends
   ComponentProps<"div"> {
     votes: number
-    hasVoted: boolean
+    userVote: "up" | "down" | null
     projectId: number
   }
 
 export default function ProjectVoting({
   votes,
-  hasVoted,
+  userVote,
   className,
   projectId
 }: ProjectVotingProps) {
@@ -34,7 +34,7 @@ export default function ProjectVoting({
   return (
     <div className={cn("flex flex-col w-fit items-center", className)}>
       <ProjectVotingButton 
-        hasVoted={hasVoted} 
+        aria-pressed={userVote === "up"}
         intent="up-vote"
         onClick={upvoteHandler}
       >
@@ -42,7 +42,7 @@ export default function ProjectVoting({
       </ProjectVotingButton>
       <span className="text-sm font-semibold transition-colors text-foreground">{votes}</span>
       <ProjectVotingButton 
-        hasVoted={hasVoted} 
+        aria-pressed={userVote === "down"}
         intent="down-vote"
         onClick={downvoteHandler}
         >

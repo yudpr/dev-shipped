@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 
 const projectVotingButtonVariants = cva(
-  "bg-transparent text-primary hover:text-primary",
+  "bg-transparent text-primary/70 hover:text-primary aria-pressed:text-primary aria-pressed:hover:bg-primary-foreground/50 aria-pressed:[&_svg]:stroke-4",
   {
     variants: {
       intent: {
-        "up-vote": "aria-pressed:bg-primary/10 aria-pressed:hover:bg-primary/20 aria-[pressed=false]:hover:bg-primary/10",
-        "down-vote": "aria-pressed:text-destructive aria-[pressed=false]:opacity-50 aria-[pressed=false]:cursor-not-allowed"
+        "up-vote": "hover:bg-secondary/30",
+        "down-vote": "hover:bg-destructive/20"
       },
 
     }
@@ -19,21 +19,17 @@ const projectVotingButtonVariants = cva(
 interface ProjectVotingButtonProps extends
   ComponentProps<typeof Button>,
   VariantProps<typeof buttonVariants>,
-  VariantProps<typeof projectVotingButtonVariants> {
-    hasVoted: boolean
-  }
+  VariantProps<typeof projectVotingButtonVariants> {}
 
 export default function ProjectVotingButton({
   variant="ghost",
   size="icon-sm",
-  hasVoted=false,
   intent="up-vote",
   className,
   ...props
 }: ProjectVotingButtonProps) {
   return (
     <Button 
-      aria-pressed={hasVoted}
       className={cn(
         buttonVariants({size, variant}),
         projectVotingButtonVariants({intent}),
