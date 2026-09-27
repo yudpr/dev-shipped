@@ -12,8 +12,7 @@ const meta = {
   title: "Molecules/Project Voting",
   component: ProjectVoting,
   args: {
-    votes: 999,
-    hasVoted: false
+    votes: 999
   },
   tags: ["autodocs"]
 } satisfies Meta<typeof ProjectVoting>;

@@ -6,12 +6,6 @@ export function getFeaturedProjects() {
   ]
 }
 
-export function getAllProjects() {
-  return [
-    ...allProjects
-  ]
-}
-
 export function getRecentProjects() {
   return []
 }

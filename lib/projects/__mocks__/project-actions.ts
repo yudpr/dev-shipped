@@ -6,7 +6,9 @@ export const addProjectAction = async () => {
 }
 
 export const checkSlugAvailability = async () => {
-  return {
-    success: true
-  }
+  return { success: true }
+}
+
+export const projectVotingAction = async () => {
+  return { success: true }
 }
