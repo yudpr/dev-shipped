@@ -61,7 +61,7 @@ export const Empty = {
     emptyStateTitle: "test title",
     children: (
       <>
-      {featuredProjects.slice(0, 0).map(i => <ProjectCard {...i}/>)}
+      {featuredProjects.slice(0, 0).map((i, index) => <ProjectCard {...i} key={index}/>)}
       </>
     )
   },
