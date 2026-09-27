@@ -4,10 +4,21 @@ import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 
-type AuthUserId =  string | null
-
-export async function getFeaturedProjects(userId: AuthUserId) {
-  "use cache";
+export async function getFeaturedProjects() {
+  /**
+   * This get-select is no more with "use cache" to disable
+   * explicit caching, because technically this function and
+   * getRecentProjects query data dynamically in "/" page.
+   * 
+   * Instead of using revalidatePath, it uses next/cache
+   * refresh in the mutation side. revalidatePath purges 
+   * get-select caches in that page, while both function 
+   * caches nothing. So refresh is the right call as it's only 
+   * re-run dynamic get-select to get latest data.
+   * 
+   */
+  const { userId } = await auth()  
+  
 
   const projectsData = await db
     .select({

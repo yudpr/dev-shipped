@@ -4,7 +4,6 @@ import CustomButton from "../atoms/custom-button";
 import ProjectCardGroup from "./project-card-group";
 import { getFeaturedProjects } from "@/lib/projects/project-select";
 import ProjectCard from "../molecules/project-card";
-import { auth } from "@clerk/nextjs/server";
 import { Suspense } from "react";
 import SkeletonLoading from "../atoms/skeleton-loading";
 
@@ -31,12 +30,7 @@ export default async function FeatSection() {
 }
 
 async function FeatProjects(){
-  /**
-   * auth needs to be here because getFeaturedProjects is cached.
-   * Next.js recommends to not cache auth.
-   */
-  const { userId } = await auth()  
-  const featuredProjects =  await getFeaturedProjects(userId)
+  const featuredProjects =  await getFeaturedProjects()
 
   return (
     <ProjectCardGroup

@@ -5,7 +5,6 @@ import ProjectVotingButton from "../atoms/project-voting-button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { projectVotingAction } from "@/lib/projects/project-actions";
-import { usePathname } from "next/navigation";
 
 interface ProjectVotingProps extends
   ComponentProps<"div"> {
@@ -20,15 +19,14 @@ export default function ProjectVoting({
   className,
   projectId
 }: ProjectVotingProps) {
-  const pathname = usePathname()
 
   const upvoteHandler = async () => {
-    const result = await projectVotingAction(projectId, "up", pathname)
+    const result = await projectVotingAction(projectId, "up")
     // Optimistic update will be implemented soon
   }
 
   const downvoteHandler = async () => {
-    const result = await projectVotingAction(projectId, "down", pathname)
+    const result = await projectVotingAction(projectId, "down")
     // Optimistic update will be implemented soon
   }
   return (

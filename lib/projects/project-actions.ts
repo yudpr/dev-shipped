@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 type ActionResult =
   | { success: false, error: string }
@@ -172,25 +172,15 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
 
 type VoteType = "up" | "down"
 
-const ALLOWED_PATHS = ['/'];
-
 export const projectVotingAction = async (
   projectId: number, 
-  incomingVoteType: VoteType, 
-  currentPath: string
+  incomingVoteType: VoteType
 ): Promise<ActionResult> => {
   try {
     const { userId } = await auth()
 
     if (!userId) {
       return { success: false, error: "You must be signed-in to submit." }
-    }
-
-    /**
-     * Route validation guard rails to prevent malicious cache churn
-     */
-    if (!ALLOWED_PATHS.includes(currentPath)) {
-      return { success: false, error: "Invalid routing context configuration." }
     }
     
     /**
@@ -266,9 +256,9 @@ export const projectVotingAction = async (
     })
 
     /**
-     * Clear cache to reflect changes on the specified path.
+     * Re-run dynamic get-select functions.
      */
-    revalidatePath(currentPath)
+    refresh()
     return { success: true }
   } catch (error) {
     console.error(error)
