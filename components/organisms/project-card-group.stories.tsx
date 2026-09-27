@@ -42,7 +42,7 @@ const meta = {
   args: {
     children: (
       <>
-        {featuredProjects.map(i => <ProjectCard {...i}/>)}
+        {featuredProjects.map((i, index) => <ProjectCard {...i} key={index}/>)}
       </>
     )
   },
