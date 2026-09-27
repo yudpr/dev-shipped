@@ -14,10 +14,7 @@ interface ProjectVotingProps extends
     projectId: number
   }
 
-interface NewData { 
-  amount: number, 
-  incomingVote: "up" | "down"
-}
+type IncomingVote = "up" | "down"
 
 export default function ProjectVoting({
   votes,
@@ -27,28 +24,26 @@ export default function ProjectVoting({
 }: ProjectVotingProps) {
   const [ optimisticVotes, setOptimisticVotes ] = useOptimistic(
     { votes, userVote },
-    (state, newData: NewData) => ({
-      votes: Math.max(0, state.votes + newData.amount),
-      userVote: newData.incomingVote
-    })
+    (state, incomingVote: IncomingVote) => {
+      const undoing = state.userVote === incomingVote
+      const switching = state.userVote !== null && !undoing
+      const amount = undoing
+        ? incomingVote === "up" ? -1 : 1
+        : switching
+          ? incomingVote === "up" ? 2 : -2
+          : incomingVote === "up" ? 1 : -1
+
+      return {
+        votes: Math.max(0, state.votes + amount),
+        userVote: undoing ? null : incomingVote   
+      }
+    }
   )
 
-  const votingHandler = (incomingVote: "up"|"down") => {
+  const votingHandler = (incomingVote: IncomingVote) => {
     startTransition(async () => {
-      let modifier = 0
-
-      if (userVote && incomingVote === userVote) {
-        modifier = incomingVote === "up"? -1 : 1
-      } else if (userVote && incomingVote !== userVote) {
-        modifier = incomingVote === "up"? 2 : -2
-      } else {
-        modifier = incomingVote === "up"? 1 : -1
-      }
-
-      setOptimisticVotes({ 
-        amount: modifier, 
-        incomingVote
-      })
+      
+      setOptimisticVotes(incomingVote)
 
       try {
         const result = await projectVotingAction(projectId, incomingVote)
@@ -56,7 +51,7 @@ export default function ProjectVoting({
         if (!result.success) {
           toast.add({
             type: "error",
-            description: result?.error ?? "Something went wrong"
+            description: result.error
           })  
         }
       } catch {
