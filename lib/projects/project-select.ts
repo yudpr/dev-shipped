@@ -81,14 +81,14 @@ export async function getRecentProjects() {
 }
 
 export async function getApprovedProjectSlugs() {
-  try {
-    const approvedProjectSlugs = await db
+  /**
+   * No try/catch. Let the db select throws error at build time
+   * if error exist.
+   */
+  const approvedProjectSlugs = await db
     .select({slug: projects.slug})
     .from(projects)
     .where(eq(projects.status, "approved"))
 
-    return approvedProjectSlugs
-  } catch (error) {
-    console.error(error)
-  }
+  return approvedProjectSlugs
 }
