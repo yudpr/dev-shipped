@@ -79,3 +79,16 @@ export async function getRecentProjects() {
     p.createdAt &&
       new Date(p.createdAt) >= sevenDaysAgo)
 }
+
+export async function getApprovedProjectSlugs() {
+  try {
+    const approvedProjectSlugs = await db
+    .select({slug: projects.slug})
+    .from(projects)
+    .where(eq(projects.status, "approved"))
+
+    return approvedProjectSlugs
+  } catch (error) {
+    console.error(error)
+  }
+}
