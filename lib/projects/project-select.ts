@@ -99,7 +99,7 @@ export async function getProjectBySlug(slug: string) {
     .from(projects)
     .where(eq(projects.slug, slug))
     .limit(1)
-    .then(i => i[0])    
+    .then(i => i[0]) // noUncheckIndexAccess is set to true might give i[n] an undefined value.
   
   return project
 }
