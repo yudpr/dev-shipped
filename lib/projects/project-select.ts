@@ -92,3 +92,14 @@ export async function getApprovedProjectSlugs() {
 
   return approvedProjectSlugs
 }
+
+export async function getProjectBySlug(slug: string) {
+  const project = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.slug, slug))
+    .limit(1)
+    .then(i => i[0])    
+  
+  return project
+}
