@@ -47,3 +47,23 @@ export const projects = pgTable(
     index("projects_organization_idx").on(table.organizationId),
   ]
 );
+
+// ============= VOTES =============
+export const voteTypeEnum = pgEnum('vote_type', ['up', 'down']);
+
+export const votes = pgTable('votes', {
+  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  
+  // Connects the vote to your projects table
+  projectId: integer('project_id')
+    .references(() => projects.id, { onDelete: 'cascade' })
+    .notNull(),
+  userId: text('user_id').notNull(),
+  voteType: voteTypeEnum('vote_type').notNull(), 
+}, 
+  (table) => [
+    // This unique constraint makes it physically impossible for a single user 
+    // to have more than one active vote row on a specific project.
+    uniqueIndex('user_project_unique_idx').on(table.userId, table.projectId)
+  ]
+);

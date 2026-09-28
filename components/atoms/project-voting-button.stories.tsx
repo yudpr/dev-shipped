@@ -21,8 +21,8 @@ const meta = {
   component: ProjectVotingButton,
   args: {
     intent: "down-vote",
-    hasVoted: false,
-    children: <ChevronDown className="size-5"/>
+    children: <ChevronDown className="size-5"/>,
+    "aria-pressed": true
   },
   tags: ["autodocs"]
 } satisfies Meta<typeof ProjectVotingButton>

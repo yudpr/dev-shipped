@@ -3,9 +3,10 @@
 import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 import { formSchema } from "@/components/molecules/project-submit-form.schema";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
+import { refresh } from "next/cache";
 
 type ActionResult =
   | { success: false, error: string }
@@ -166,5 +167,101 @@ const createDefaultOrg = async (): Promise<ActionResult> => {
       success: false,
       error: "Could not configure your organization workspace. Please try again."
     }
+  }
+}
+
+type VoteType = "up" | "down"
+
+export const projectVotingAction = async (
+  projectId: number, 
+  incomingVoteType: VoteType
+): Promise<ActionResult> => {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return { success: false, error: "You must be signed-in to submit." }
+    }
+    
+    /**
+     * Keep database atomic by using transaction because this action needs to
+     * mutate two tables at the same execution, projects' vote count and votes'
+     * vote type.
+     */
+    await db.transaction(async (tx) => {
+    /**
+     * Look for an existing vote from the user. Executing this inside the 
+     * transaction block narrows the concurrency window, which earlier the app
+     * opens 2 connections, select query connection and mutate connection with tx. 
+     * 
+     * This creates more time gaps which a rapid double-click might cause double
+     * writes that go to the same if branch. If it still bypasses this check, 
+     * the database schema's Unique Index constraint will reject the duplicate insert 
+     * and safely roll back the transaction.
+     */
+    const existingVote = await tx
+      .select({ voteType: votes.voteType })
+      .from(votes)
+      .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+      .limit(1)
+      .then((rows) => rows[0]) // unpack that one data from array
+
+      /**
+       * Undo vote if the user click the same button as the existing vote.
+       */
+      if (existingVote && existingVote.voteType === incomingVoteType) {
+        await tx
+          .delete(votes)
+          .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+        
+        const modifier = incomingVoteType === "up"? -1 : 1
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`vote_count + ${modifier}` }) // Removed GREATEST() to let math calculate correctly across 0 thresholds
+          .where(eq(projects.id, projectId))
+
+      /**
+       * Direct change if the user clicked the opposite button as the existing vote.
+       */
+      } else if ( existingVote && existingVote.voteType !== incomingVoteType) {
+        await tx
+          .update(votes)
+          .set({ voteType: incomingVoteType })
+          .where(and(eq(votes.projectId, projectId), eq(votes.userId, userId)))
+        
+        const modifier = incomingVoteType === "up"? 2 : -2
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`vote_count + ${modifier}` })
+          .where(eq(projects.id, projectId))
+
+      /**
+       * Brand new vote if the existing vote is none.
+       */
+      } else {
+        await tx
+          .insert(votes)
+          .values({
+            projectId,
+            userId,
+            voteType: incomingVoteType
+          })
+
+        const modifier = incomingVoteType === "up"? 1 : -1
+        await tx
+          .update(projects)
+          .set({ voteCount: sql`vote_count + ${modifier}` })
+          .where(eq(projects.id, projectId))
+      }
+    })
+
+    /**
+     * Re-run dynamic get-select functions.
+     */
+    refresh()
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Could not sync your vote with our database servers." }
   }
 }

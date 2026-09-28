@@ -1,36 +1,79 @@
 import { db } from "@/db";
-import { projects } from "@/db/schema";
-import {  desc, eq, } from "drizzle-orm";
+import { projects, votes } from "@/db/schema";
+import { auth } from "@clerk/nextjs/server";
+import { and, desc, eq, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 
 export async function getFeaturedProjects() {
-  "use cache";
+  /**
+   * This get-select is no more with "use cache" to disable
+   * explicit caching, because technically this function and
+   * getRecentProjects query data dynamically in "/" page.
+   * 
+   * Instead of using revalidatePath, it uses next/cache
+   * refresh in the mutation side. revalidatePath purges 
+   * get-select caches in that page, while both function 
+   * caches nothing. So refresh is the right call as it's only 
+   * re-run dynamic get-select to get latest data.
+   * 
+   */
+  const { userId } = await auth()  
+  
 
   const projectsData = await db
-    .select()
+    .select({
+      id: projects.id,
+      name: projects.name,
+      description: projects.description,
+      tags: projects.tags,
+      voteCount: projects.voteCount,
+      userVote: votes.voteType
+    })
     .from(projects)
     .where(eq(projects.status, "approved"))
     .orderBy(desc(projects.voteCount))
     .limit(5)
-
-  return projectsData
-}
-
-export async function getAllProjects() {
-  const projectsData = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.status, "approved"))
-    .orderBy(desc(projects.createdAt))
-    .limit(10)
+    .leftJoin(
+      votes,
+      and(
+        eq(votes.projectId, projects.id),
+        userId 
+          ? eq(votes.userId, userId) // only join votes belonging to this userId
+          : sql`false`
+      )
+    )
 
   return projectsData
 }
 
 export async function getRecentProjects() {
+  const { userId } = await auth()
+
   await connection()
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const projectsData = await getAllProjects()
+  const projectsData = await db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      description: projects.description,
+      tags: projects.tags,
+      voteCount: projects.voteCount,
+      userVote: votes.voteType,
+      createdAt: projects.createdAt
+    })
+    .from(projects)
+    .where(eq(projects.status, "approved"))
+    .orderBy(desc(projects.createdAt))
+    .limit(10)
+    .leftJoin(
+      votes,
+      and(
+        eq(votes.projectId, projects.id),
+        userId 
+          ? eq(votes.userId, userId)
+          : sql`false`
+      )
+    )
 
   return projectsData.filter(p => 
     p.createdAt &&
