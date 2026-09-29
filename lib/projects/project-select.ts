@@ -94,11 +94,33 @@ export async function getApprovedProjectSlugs() {
 }
 
 export async function getProjectBySlug(slug: string) {
+  const { userId } = await auth()  
+
   const project = await db
-    .select()
+    .select({
+      id: projects.id,
+      name: projects.name,
+      tagline: projects.tagline,
+      description: projects.description,
+      tags: projects.tags,
+      createdAt: projects.createdAt,
+      submittedBy: projects.submittedBy,
+      websiteUrl: projects.websiteUrl,
+      voteCount: projects.voteCount,
+      userVote: votes.voteType
+    })
     .from(projects)
     .where(eq(projects.slug, slug))
     .limit(1)
+    .leftJoin(
+      votes,
+      and(
+        eq(votes.projectId, projects.id),
+        userId 
+          ? eq(votes.userId, userId)
+          : sql`false`
+      )
+    )
     .then(i => i[0]) // noUncheckedIndexedAccess is set to true might give i[n] an undefined value.
   
   return project
