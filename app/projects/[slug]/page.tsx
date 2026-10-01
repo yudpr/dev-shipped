@@ -1,7 +1,5 @@
-import EmptyState from "@/components/atoms/empty-state"
 import ProjectPage from "@/components/pages/project-page"
 import { getApprovedProjectSlugs } from "@/lib/projects/project-select"
-import { Suspense } from "react"
 
 /**
  * This is needed for optimizing dynamic routes and SEO,
@@ -21,15 +19,5 @@ export const generateStaticParams = async () => {
  */
 
 export default function Project({ params }:PageProps<"/projects/[slug]">) {
-  return (
-    <Suspense fallback={
-      <EmptyState
-        emptyStateTitle="Loading layout engine..."
-        emptyStateDescription=""
-        mediaSpinner
-      />
-    }>
-      <ProjectPage params={params}/>
-    </Suspense>
-  )
+  return <ProjectPage params={params}/>
 }
