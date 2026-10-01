@@ -2,7 +2,6 @@ import Header from "../organisms/header"
 import Footer from "../organisms/footer"
 import ProjectSection from "../organisms/project-section"
 import { Suspense } from "react"
-import EmptyState from "../atoms/empty-state"
 import SkeletonLoading from "../atoms/skeleton-loading"
 
 type ProjectPageProps = { params: Promise<{ slug: string }> }
@@ -45,7 +44,7 @@ function LoadingState() {
                 </div>
               </div>
             </div>
-            <div className="prose prose-neutral dark:prose-invert max-w-none flex flex-col gap-0.5">
+            <div className="prose prose-neutral dark:prose-invert max-w-none space-y-0.5">
               <SkeletonLoading className="h-7 w-30 mb-4" />
               <SkeletonLoading className="h-6 w-full" />
               <SkeletonLoading className="h-6 w-1/2" />
