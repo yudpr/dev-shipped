@@ -4,6 +4,9 @@ import ProjectSection from "./project-section";
 const meta: Meta<typeof ProjectSection> = {
   title: "Organisms/Project Section",
   component: ProjectSection,
+  args: {
+    params: Promise.resolve({ slug: "slug" }),
+  },
   tags: ["autodocs"],
 };
 
