@@ -11,7 +11,7 @@ export function getRecentProjects() {
 }
 
 
-export function getProjectBySlug(slug="project_slug") {
+export function getProjectBySlug() {
 
   return {
     id: "projects_id",

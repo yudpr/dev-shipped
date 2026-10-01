@@ -7,6 +7,7 @@ const featuredProjects: ProjectCardProps[] = [
   {
     id: 1,
     name: "ExampleProject1",
+    slug: "exampleproject1",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
     voteCount: 123,
@@ -16,6 +17,7 @@ const featuredProjects: ProjectCardProps[] = [
   {
     id: 2,
     name: "ExampleProject2",
+    slug: "exampleproject2",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
     voteCount: 123,
@@ -25,6 +27,7 @@ const featuredProjects: ProjectCardProps[] = [
   {
     id: 3,
     name: "ExampleProject3",
+    slug: "exampleproject3",
     description: "An example project for demonstration purposes.",
     tags: ["Feature", "Card"],
     voteCount: 123,
