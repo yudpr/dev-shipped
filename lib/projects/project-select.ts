@@ -24,6 +24,7 @@ export async function getFeaturedProjects() {
     .select({
       id: projects.id,
       name: projects.name,
+      slug: projects.slug,
       description: projects.description,
       tags: projects.tags,
       voteCount: projects.voteCount,
@@ -55,6 +56,7 @@ export async function getRecentProjects() {
     .select({
       id: projects.id,
       name: projects.name,
+      slug: projects.slug,
       description: projects.description,
       tags: projects.tags,
       voteCount: projects.voteCount,

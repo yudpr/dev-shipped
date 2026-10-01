@@ -17,6 +17,7 @@ export interface ProjectCardProps extends
   Pick<InferSelectModel<typeof projects>, 
     | "id" 
     | "name" 
+    | "slug"
     | "description"
     | "tags"
     | "voteCount"
@@ -28,6 +29,7 @@ export interface ProjectCardProps extends
 export default function ProjectCard({
   id,
   name,
+  slug,
   description,
   tags,
   voteCount,
@@ -60,7 +62,7 @@ export default function ProjectCard({
       <CardFooter className="gap-2 border-0 bg-transparent scroll-fade-x overflow-y-auto scrollbar-none mx-(--card-spacing) p-0 relative z-10">
         {tags?.map(i => <Badge key={i} variant="secondary">{i}</Badge>)}
       </CardFooter>
-      <Link href={`/projects/${id}`} className="absolute inset-0 z-0">
+      <Link href={`/projects/${slug}`} className="absolute inset-0 z-0">
         <span className="sr-only">Open {name}</span>
       </Link>
     </Card>
