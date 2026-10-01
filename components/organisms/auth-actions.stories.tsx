@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import AuthActions from "./auth-actions";
+import { ClerkProvider } from "@clerk/nextjs";
 
 /**
  * This component shows buttons/links depending of the
@@ -13,6 +14,13 @@ import AuthActions from "./auth-actions";
 const meta = {
   title: "Organisms/Auth Actions",
   component: AuthActions,
+  decorators: [
+    (Story) => (
+      <ClerkProvider>
+        <Story />
+      </ClerkProvider>
+    )
+  ],
   tags: ["autodocs"]
 } satisfies Meta<typeof AuthActions>
 

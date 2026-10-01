@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Header from "./header";
+import { ClerkProvider } from "@clerk/nextjs";
 
 /**
  * This shows icon, navigation links, and auth actions.
@@ -8,6 +9,13 @@ import Header from "./header";
 const meta = {
   title: "Organisms/Header",
   component: Header,
+  decorators: [
+    (Story) => (
+      <ClerkProvider>
+        <Story />
+      </ClerkProvider>
+    )
+  ],
   tags: ["autodocs"]
 } satisfies Meta<typeof Header>
 

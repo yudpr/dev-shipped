@@ -24,6 +24,7 @@ export async function getFeaturedProjects() {
     .select({
       id: projects.id,
       name: projects.name,
+      slug: projects.slug,
       description: projects.description,
       tags: projects.tags,
       voteCount: projects.voteCount,
@@ -55,6 +56,7 @@ export async function getRecentProjects() {
     .select({
       id: projects.id,
       name: projects.name,
+      slug: projects.slug,
       description: projects.description,
       tags: projects.tags,
       voteCount: projects.voteCount,
@@ -78,4 +80,50 @@ export async function getRecentProjects() {
   return projectsData.filter(p => 
     p.createdAt &&
       new Date(p.createdAt) >= sevenDaysAgo)
+}
+
+export async function getApprovedProjectSlugs() {
+  /**
+   * No try/catch. Let the db select throws error at build time
+   * if error exist.
+   */
+  const approvedProjectSlugs = await db
+    .select({slug: projects.slug})
+    .from(projects)
+    .where(eq(projects.status, "approved"))
+
+  return approvedProjectSlugs
+}
+
+export async function getProjectBySlug(slug: string) {
+  const { userId } = await auth()  
+
+  const project = await db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      tagline: projects.tagline,
+      description: projects.description,
+      tags: projects.tags,
+      createdAt: projects.createdAt,
+      submittedBy: projects.submittedBy,
+      websiteUrl: projects.websiteUrl,
+      voteCount: projects.voteCount,
+      userVote: votes.voteType
+    })
+    .from(projects)
+    .where(eq(projects.slug, slug))
+    .limit(1)
+    .leftJoin(
+      votes,
+      and(
+        eq(votes.projectId, projects.id),
+        userId 
+          ? eq(votes.userId, userId)
+          : sql`false`
+      )
+    )
+    .then(i => i[0]) // noUncheckedIndexedAccess is set to true might give i[n] an undefined value.
+  
+  return project
 }

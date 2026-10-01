@@ -34,8 +34,10 @@ export default function SyncWorkspacePage() {
       return
     }
 
-    if (userMemberships.data && userMemberships.data.length > 0) {
-      const orgToActivate = newOrgId || userMemberships.data[0].organization.id
+    const [ firstMembership ] = userMemberships.data // Changed to this form instead because using index in earlier form still returns with ... | undefined type eventhough it has a guard that checks over the array lenght.
+
+    if (firstMembership) {
+      const orgToActivate = newOrgId || firstMembership.organization.id
 
       setActive({ organization: orgToActivate })
         .then(() => { 
