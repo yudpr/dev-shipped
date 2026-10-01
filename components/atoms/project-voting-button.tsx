@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 
 const projectVotingButtonVariants = cva(
-  "bg-transparent text-primary/70 hover:text-primary aria-pressed:text-primary aria-pressed:hover:bg-primary-foreground/50 aria-pressed:[&_svg]:stroke-4",
+  "bg-transparent text-primary/40 hover:text-primary/70 aria-pressed:text-primary aria-pressed:hover:bg-primary-foreground/50 aria-pressed:[&_svg]:stroke-3",
   {
     variants: {
       intent: {
@@ -23,8 +23,8 @@ interface ProjectVotingButtonProps extends
 
 export default function ProjectVotingButton({
   variant="ghost",
-  size="icon-sm",
   intent="up-vote",
+  size="default",
   className,
   ...props
 }: ProjectVotingButtonProps) {

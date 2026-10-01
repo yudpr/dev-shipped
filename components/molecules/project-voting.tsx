@@ -2,16 +2,32 @@
 
 import { ComponentProps, startTransition, useOptimistic } from "react";
 import ProjectVotingButton from "../atoms/project-voting-button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Triangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { projectVotingAction } from "@/lib/projects/project-actions";
 import { toast } from "../ui/toast";
+import { cva, VariantProps } from "class-variance-authority";
 
+const projectVotingVariants = cva(
+  "",
+  {
+    variants: {
+      size: {
+        default: "[&_svg]:size-4 [&>span]:text-base",
+        lg: "[&_svg]:size-5 [&>span]:text-lg"
+      }
+    },
+    defaultVariants: {
+      size: "default"
+    },
+  }
+)
 interface ProjectVotingProps extends
   ComponentProps<"div"> {
     votes: number
     userVote: "up" | "down" | null
-    projectId: number
+    projectId: number,
+    size?: VariantProps<typeof projectVotingVariants>["size"]
   }
 
 type IncomingVote = "up" | "down"
@@ -20,6 +36,7 @@ export default function ProjectVoting({
   votes,
   userVote,
   className,
+  size,
   projectId
 }: ProjectVotingProps) {
   const [ optimisticVotes, setOptimisticVotes ] = useOptimistic(
@@ -64,21 +81,27 @@ export default function ProjectVoting({
   }
 
   return (
-    <div className={cn("flex flex-col w-fit items-center", className)}>
+    <div className={cn(
+        "flex flex-col w-fit items-center", 
+        projectVotingVariants({ size }),
+        className
+    )}>
       <ProjectVotingButton 
         aria-pressed={optimisticVotes.userVote === "up"}
         intent="up-vote"
+        size={size}
         onClick={() => { votingHandler("up") }}
       >
-        <ChevronUp className="size-5"/>
+        <Triangle className="size-4 fill-current stroke-0"/>
       </ProjectVotingButton>
-      <span className="text-sm font-semibold transition-colors text-foreground">{optimisticVotes.votes}</span>
+      <span className="text-base font-semibold transition-colors text-foreground">{optimisticVotes.votes}</span>
       <ProjectVotingButton 
         aria-pressed={optimisticVotes.userVote === "down"}
         intent="down-vote"
+        size={size}
         onClick={() => { votingHandler("down") }}
         >
-        <ChevronDown className="size-5"/>
+        <Triangle className="size-4 fill-current stroke-0 rotate-180"/>
       </ProjectVotingButton>
     </div>
   )
