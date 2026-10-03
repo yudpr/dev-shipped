@@ -132,7 +132,7 @@ export async function getProjectBySlug(slug: string) {
   return project
 }
 
-type ExploreProjectSuccess = {
+export type ExploreProjectSuccess = {
   success: true,
   data: (
     & Pick<InferSelectModel<typeof projects>, 

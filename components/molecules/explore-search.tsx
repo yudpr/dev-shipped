@@ -7,7 +7,7 @@ import { Spinner } from "../ui/spinner";
 import { UseExploreProject } from "../organisms/project-explorer";
 import { ComponentProps } from "react";
 
-export default function ExploreSearch(exploreProject: UseExploreProject["exploreProject"]) {
+export default function ExploreSearch({exploreProject, exploreProjectState}: UseExploreProject) {
   return (
     <div className="space-y-5">
       <div className="flex justify-center">
@@ -21,11 +21,19 @@ export default function ExploreSearch(exploreProject: UseExploreProject["explore
             <InputGroupAddon>
               <Compass />
             </InputGroupAddon>
-            {/* Swap component logic will be implemented soon */}
-            <InputGroupAddon align="inline-end" className="hidden sm:inline">12 results</InputGroupAddon>
-            <InputGroupAddon align="inline-end" className="hidden sm:inline">
-              <Spinner className="size-5 stroke-3"/>
-            </InputGroupAddon>
+            {
+              exploreProjectState.isSearching
+                ? (
+                    <InputGroupAddon align="inline-end" className="hidden sm:inline">
+                      <Spinner className="size-5 stroke-3"/>
+                    </InputGroupAddon>
+                  )
+                : (
+                    <InputGroupAddon align="inline-end" className="hidden sm:inline">
+                      12 result(s)
+                    </InputGroupAddon>
+                  )
+            }
           </InputGroup>
           <SortButtonInside
             onClick={() => {exploreProject.handleOrder("trending")}}
@@ -60,19 +68,25 @@ export default function ExploreSearch(exploreProject: UseExploreProject["explore
           Recent
         </SortButtonOutside>
       </ButtonGroup>
-      {/* Swap component logic will be implemented soon */}
-      <Marker variant="separator" className="sm:hidden">
-        <MarkerIcon>
-          <Search />
-        </MarkerIcon>
-        <MarkerContent className="text-sm font-medium text-muted-foreground">12 results</MarkerContent>
-      </Marker>
-      <Marker variant="separator" role="status" className="sm:hidden">
-        <MarkerIcon>
-          <Spinner />
-        </MarkerIcon>
-        <MarkerContent className="text-sm font-medium text-muted-foreground">Searching...</MarkerContent>
-      </Marker>
+      {
+        exploreProjectState.isSearching
+          ? (
+              <Marker variant="separator" role="status" className="sm:hidden">
+                <MarkerIcon>
+                  <Spinner />
+                </MarkerIcon>
+                <MarkerContent className="text-sm font-medium text-muted-foreground">Searching...</MarkerContent>
+              </Marker>
+            )
+          : (
+              <Marker variant="separator" className="sm:hidden">
+                <MarkerIcon>
+                  <Search />
+                </MarkerIcon>
+                <MarkerContent className="text-sm font-medium text-muted-foreground">12 result(s)</MarkerContent>
+              </Marker>
+            )
+      }
     </div>
   )
 }

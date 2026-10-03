@@ -3,13 +3,14 @@
 import { Compass } from "lucide-react";
 import ExploreSearch from "../molecules/explore-search";
 import ProjectCardGroup from "./project-card-group";
-import { getExploreProjects } from "@/lib/projects/project-select";
-import { ChangeEvent, Suspense, useCallback, useEffect, useState, useTransition } from "react";
+import { ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
+import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { searchParamsSchema, type SearchParamsType } from "./project-explorer.schema";
 import z from "zod";
 import ProjectCard from "../molecules/project-card";
+import SkeletonLoading from "../atoms/skeleton-loading";
 
 interface ExloreProjectStateErrorTrue {
   invalid: true
@@ -25,6 +26,8 @@ type ExloreProjectStateError = ExloreProjectStateErrorTrue | ExloreProjectStateE
 export type UseExploreProject = ReturnType<typeof useExploreProject>
 
 function useExploreProject() {
+  const requestId = useRef(0)
+
   const searchParams = useSearchParams()
 
   const [isPending, startTransition] = useTransition()
@@ -43,9 +46,10 @@ function useExploreProject() {
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     })
+    setIsLoading(true)
   }, 400)
 
-  const handleOrder = useCallback((sortType: SearchParamsType["sort"]) => {
+  const handleOrder = useDebouncedCallback((sortType: SearchParamsType["sort"]) => {
     const params = new URLSearchParams(searchParams)
 
     if (sortType) {
@@ -56,15 +60,18 @@ function useExploreProject() {
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     })
-  }, [])
+    setIsLoading(true)
+  }, 400)
 
   const [ error, setError ] = useState<ExloreProjectStateError>({ invalid: false })
   const query = searchParams.get("query")
   const sort = searchParams.get("sort")
-  const [ projects, setProjects ] = useState<any[]>([])
+  const [ projects, setProjects ] = useState<ExploreProjectSuccess["data"]>([])
+  const [ isLoading, setIsLoading ] = useState(false)
 
   useEffect(() => {
     (async function () {
+      const id = ++requestId.current
       const searchParamsValidation = searchParamsSchema.safeParse({ sort, query })
 
       if (!searchParamsValidation.success) {
@@ -72,6 +79,7 @@ function useExploreProject() {
           invalid: true,
           errors: searchParamsValidation.error.issues
         })
+        setIsLoading(false)
         return
       }
       
@@ -82,11 +90,15 @@ function useExploreProject() {
           invalid: true,
           errors: result.errors
         })
+        setIsLoading(false)
         return
       }
-      setError({invalid: false})
 
-      setProjects(result.data)
+      if (id === requestId.current) {
+        setError({invalid: false})
+        setProjects(result.data)
+        setIsLoading(false)
+      }
     })()
   }, [sort, query])
 
@@ -100,7 +112,7 @@ function useExploreProject() {
     exploreProjectState: {
       data: projects,
       error,
-      isPending
+      isSearching: isPending || isLoading
     }
   }
 }
@@ -120,7 +132,7 @@ const emptyState = {
 export default function ProjectExplorerSection() {
   return(
     <div className="space-y-10">
-      <Suspense fallback={<></>}>
+      <Suspense fallback={<LoadingProjectExplorer />}>
         <ProjectExplorer />
       </Suspense>
     </div>
@@ -128,18 +140,47 @@ export default function ProjectExplorerSection() {
 }
 
 function ProjectExplorer() {
-  const { exploreProject, exploreProjectState } = useExploreProject()
-  // skeleton loading will be implemented soon
+  const exploreProject = useExploreProject()
+  
   return (
     <>
       <ExploreSearch {...exploreProject}/>
-      <ProjectCardGroup 
-        emptyStateDescription={emptyState.empty.description}
-        emptyStateTitle={emptyState.empty.title}
-        emptyStateIcon={Compass}
-      >
-       { exploreProjectState.data.map(i => <ProjectCard {...i} key={i.id}/>)} 
-      </ProjectCardGroup>
+      {
+        exploreProject.exploreProjectState.isSearching
+          ? <LoadingProjects />
+          : (
+              <ProjectCardGroup 
+                emptyStateDescription={emptyState.empty.description}
+                emptyStateTitle={emptyState.empty.title}
+                emptyStateIcon={Compass}
+              >
+              { exploreProject.exploreProjectState.data.map(i => <ProjectCard {...i} key={i.id}/>)} 
+              </ProjectCardGroup>
+
+            )
+      }
     </>
+  )
+}
+
+function LoadingProjects() {
+  return (
+    <div className="grid-wrapper">
+        {[...Array(5)].map((_, index) => <SkeletonLoading key={index} className="w-full h-44 rounded-xl"/>)}
+    </div>
+  )
+}
+
+function LoadingProjectExplorer() {
+  return (
+    <div className="space-y-10">
+      <div className="space-y-5">
+        <div className="flex justify-center">
+          <SkeletonLoading className="max-w-3xl flex-1 h-10 hidden sm:block"/>
+        </div>
+        <SkeletonLoading className="w-45 h-8 sm:hidden"/>
+      </div>
+      <LoadingProjects />
+    </div>
   )
 }
