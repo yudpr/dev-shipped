@@ -4,14 +4,20 @@ import { ButtonGroup } from "../ui/button-group"
 import { Button } from "../ui/button";
 import { Marker, MarkerContent, MarkerIcon } from "../ui/marker";
 import { Spinner } from "../ui/spinner";
+import { UseExploreProject } from "../organisms/project-explorer";
+import { ComponentProps, ReactNode } from "react";
 
-export default function ExploreSearch() {
+export default function ExploreSearch(exploreProject: UseExploreProject["exploreProject"]) {
   return (
     <div className="space-y-5">
       <div className="flex justify-center">
         <ButtonGroup className="max-w-3xl flex-1 [&_button]:h-10">
           <InputGroup className="h-10">
-            <InputGroupInput placeholder="Explore projects..." />
+            <InputGroupInput 
+              placeholder="Explore projects..." 
+              onChange={exploreProject.handleSearch} 
+              defaultValue={exploreProject.searchParams.get("query")?.toString()}
+            />
             <InputGroupAddon>
               <Compass />
             </InputGroupAddon>
@@ -21,25 +27,38 @@ export default function ExploreSearch() {
               <Spinner className="size-5 stroke-3"/>
             </InputGroupAddon>
           </InputGroup>
-          <Button variant="outline" className="hidden sm:inline-flex">
+          <SortButtonInside
+            onClick={() => {exploreProject.handleOrder("trending")}}
+            aria-pressed={exploreProject.searchParams.get("sort") === "trending"}
+          >
             <TrendingUp data-icon="inline-start"/>
             Trending
-          </Button>
-          <Button variant="outline" className="hidden sm:inline-flex">
+          </SortButtonInside>
+          <SortButtonInside
+            onClick={() => {exploreProject.handleOrder("recent")}}
+            aria-pressed={exploreProject.searchParams.get("sort") !== "trending"}
+          >
             <Rocket data-icon="inline-start"/>
             Recent
-          </Button>
+          </SortButtonInside>
         </ButtonGroup>
       </div>
       <ButtonGroup className="sm:hidden">
-        <Button variant="outline">
+        <SortButtonOutside 
+          onClick={() => {exploreProject.handleOrder("trending")}}
+          aria-pressed={exploreProject.searchParams.get("sort") === "trending"}
+        >
           <TrendingUp data-icon="inline-start"/>
           Trending
-        </Button>
-        <Button variant="outline">
+        </SortButtonOutside>
+        <SortButtonOutside
+          variant="outline" 
+          onClick={() => {exploreProject.handleOrder("recent")}}
+          aria-pressed={exploreProject.searchParams.get("sort") !== "trending"}
+        >
           <Rocket data-icon="inline-start"/>
           Recent
-        </Button>
+        </SortButtonOutside>
       </ButtonGroup>
       {/* Swap component logic will be implemented soon */}
       <Marker variant="separator" className="sm:hidden">
@@ -55,5 +74,29 @@ export default function ExploreSearch() {
         <MarkerContent className="text-sm font-medium text-muted-foreground">Searching...</MarkerContent>
       </Marker>
     </div>
+  )
+}
+
+function SortButtonInside({
+  ...props
+}: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      variant="outline"
+      className="hidden sm:inline-flex aria-pressed:bg-primary aria-pressed:text-white hover:bg-primary/30 aria-pressed:hover:bg-primary"
+      {...props}
+    />
+  )
+}
+
+function SortButtonOutside({
+  ...props
+}: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      variant="outline"
+      className="sm:inline-flex aria-pressed:bg-primary aria-pressed:text-white hover:bg-primary/30 aria-pressed:hover:bg-primary"
+      {...props}
+    />
   )
 }

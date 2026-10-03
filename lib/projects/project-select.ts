@@ -1,8 +1,12 @@
+"use server";
+
+import { searchParamsSchema, type SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, desc, eq, sql, } from "drizzle-orm";
+import { and, arrayOverlaps, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
+import z from "zod";
 
 export async function getFeaturedProjects() {
   /**
@@ -127,3 +131,91 @@ export async function getProjectBySlug(slug: string) {
   
   return project
 }
+
+type ExploreProjectSuccess = {
+  success: true,
+  data: (
+    & Pick<InferSelectModel<typeof projects>, 
+      | "id" 
+      | "name" 
+      | "slug"
+      | "description"
+      | "tags"
+      | "voteCount"
+      | "createdAt"
+      > 
+    & { 
+        userVote: 
+          | Pick<InferSelectModel<typeof votes>, "voteType">["voteType"] 
+          | null
+      }
+  )[]
+}
+
+type ExploreProjectFailed = {
+  success: false,
+  errors: z.ZodError["issues"]
+}
+
+type ExploreProjectResult = ExploreProjectFailed | ExploreProjectSuccess
+
+export async function getExploreProjects(searchParams: SearchParamsType): Promise<ExploreProjectResult> {
+
+  const { userId } = await auth()
+
+  const searchParamsValidation = searchParamsSchema.safeParse(searchParams)
+
+  if (!searchParamsValidation.success) {
+    return {
+      success: false,
+      errors: searchParamsValidation.error.issues
+    }
+  }
+
+  const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
+
+  let baseQuery = db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      slug: projects.slug,
+      description: projects.description,
+      tags: projects.tags,
+      voteCount: projects.voteCount,
+      userVote: votes.voteType,
+      createdAt: projects.createdAt
+    })
+    .from(projects)
+    .limit(10)
+    .leftJoin(
+      votes,
+      and(
+        eq(votes.projectId, projects.id),
+        userId 
+          ? eq(votes.userId, userId)
+          : sql`false`
+      )
+    )
+    .$dynamic()
+    
+  baseQuery = orderBy === "trending" 
+    ? baseQuery.orderBy(desc(projects.voteCount))
+    : baseQuery.orderBy(desc(projects.createdAt))
+
+  if (searchQuery) {
+    baseQuery = baseQuery.where(
+      or(
+        ilike(projects.name, `%${searchQuery}%`),
+        sql`${projects.tags}::jsonb ? ${searchQuery}`
+      )
+    )
+  }
+
+  const result = await baseQuery
+
+  return {
+    success: true,
+    data: result
+  }
+}
+
