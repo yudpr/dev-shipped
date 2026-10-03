@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Marker, MarkerContent, MarkerIcon } from "../ui/marker";
 import { Spinner } from "../ui/spinner";
 import { UseExploreProject } from "../organisms/project-explorer";
-import { ComponentProps, ReactNode } from "react";
+import { ComponentProps } from "react";
 
 export default function ExploreSearch(exploreProject: UseExploreProject["exploreProject"]) {
   return (

@@ -4,7 +4,7 @@ import { searchParamsSchema, type SearchParamsType } from "@/components/organism
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, arrayOverlaps, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
+import { and, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 import z from "zod";
 
@@ -196,20 +196,27 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
           : sql`false`
       )
     )
+    .where(
+      searchQuery
+        ? (
+            and(
+              eq(projects.status, "approved"),
+              or(
+                ilike(projects.name, `%${searchQuery}%`),
+                sql`EXISTS (
+                  SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
+                  WHERE tag ILIKE ${searchQuery}
+                )` // switched to this form because earlier form has no settings for disabling case-sensitivity
+              )
+            )
+          )
+        : eq(projects.status, "approved")
+    )
     .$dynamic()
     
   baseQuery = orderBy === "trending" 
     ? baseQuery.orderBy(desc(projects.voteCount))
     : baseQuery.orderBy(desc(projects.createdAt))
-
-  if (searchQuery) {
-    baseQuery = baseQuery.where(
-      or(
-        ilike(projects.name, `%${searchQuery}%`),
-        sql`${projects.tags}::jsonb ? ${searchQuery}`
-      )
-    )
-  }
 
   const result = await baseQuery
 
