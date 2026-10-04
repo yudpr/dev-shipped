@@ -1,5 +1,3 @@
-"use server";
-
 import { searchParamsSchema, type SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";

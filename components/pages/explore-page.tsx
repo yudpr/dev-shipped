@@ -1,4 +1,4 @@
-import { ExplorePageProps } from "@/app/explore/page";
+import { type ExplorePageProps } from "@/app/explore/page";
 import ExploreSection from "../organisms/explore-section";
 import Footer from "../organisms/footer";
 import Header from "../organisms/header";

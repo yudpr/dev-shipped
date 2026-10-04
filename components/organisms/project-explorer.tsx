@@ -1,23 +1,19 @@
-import { Compass } from "lucide-react";
+import { Compass, FaceSlightlyFrowning, LucideIcon, WifiOff } from "lucide-react";
 import ExploreSearch from "../molecules/explore-search";
 import ProjectCardGroup from "./project-card-group";
-import { getExploreProjects } from "@/lib/projects/project-select";
+import { ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
 import { Suspense } from "react";
 import ProjectCard from "../molecules/project-card";
 import SkeletonLoading from "../atoms/skeleton-loading";
-import { ExplorePageProps } from "@/app/explore/page";
+import { type ExplorePageProps } from "@/app/explore/page";
 
-// Swap empty state logic will be implemented soon
-const emptyState = {
-  empty: {
-    title: "Empty feed",
-    description: "No active projects are registered on this dashboard yet. Once a project is added, it will populate here instantly."
-  },
-  notFound: {
-    title: "No projects found",
-    description: "We couldn't find anything matching your search. Try checking your spelling, broadening your terms, or clearing your filters."
-  }
-}
+type EmptyStateMessageType =
+  | undefined
+  | {
+      title: string,
+      description: string,
+      icon: LucideIcon
+    }
 
 export default function ProjectExplorerSection(props: ExplorePageProps) {
   return(
@@ -54,20 +50,48 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
    * The "use client" part is now scopped only for handling "router.replace",
    * a state, and a few more.
    */
+  let projects: ExploreProjectSuccess["data"] = []
+  let emptyStateMessage: EmptyStateMessageType
 
-  const params = await searchParams
-  const result = await getExploreProjects(params)
-  let projects
-  
-  if (result.success) {
-    projects = result.data
+  try {
+    const params = await searchParams
+    const result = await getExploreProjects(params)
+    
+    if (result.success && result.data.length) {
+      projects = result.data
+    } else if (result.success && !result.data.length && params.query) {
+      emptyStateMessage = {
+        title: "No projects found",
+        description: "We couldn't find anything matching your search. Try checking your spelling, broadening your terms, or clearing your filters.",
+        icon: Compass
+      }
+    } else if (result.success && !result.data.length && !params.query){
+      emptyStateMessage = {
+        title: "Empty feed",
+        description: "No active projects are registered on this dashboard yet. Once a project is added, it will populate here instantly.",
+        icon: Compass
+      }
+    } else if (!result.success){
+      emptyStateMessage = {
+        title: "Cannot process your queries",
+        description: result.errors.map(i => i.message).join("; ") + ".",
+        icon: FaceSlightlyFrowning
+      }
+    }
+
+  } catch {
+    emptyStateMessage = {
+      title: "Connection interrupted",
+      description: " We couldn't load this page because your internet connection is a bit unstable. Please check your signal and try again.",
+      icon: WifiOff
+    }
   }
 
   return (
     <ProjectCardGroup 
-      emptyStateDescription={emptyState.empty.description}
-      emptyStateTitle={emptyState.empty.title}
-      emptyStateIcon={Compass}
+      emptyStateDescription={emptyStateMessage?.description}
+      emptyStateTitle={emptyStateMessage?.title}
+      emptyStateIcon={emptyStateMessage?.icon}
     >
     { projects && projects.map(i => <ProjectCard {...i} key={i.id}/>)} 
     </ProjectCardGroup>
@@ -86,9 +110,10 @@ function LoadingProjectExplorer() {
   return (
     <div className="space-y-5">
       <div className="flex justify-center">
-        <SkeletonLoading className="max-w-3xl flex-1 h-10 hidden sm:block"/>
+        <SkeletonLoading className="max-w-3xl flex-1 h-10"/>
       </div>
       <SkeletonLoading className="w-45 h-8 sm:hidden"/>
+      <SkeletonLoading className="w-full h-5 sm:hidden"/>
     </div>
   )
 }
