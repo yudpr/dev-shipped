@@ -6,9 +6,10 @@ export const searchParamsSchema = z.object({
     .trim()
     .max(100, "Search query is too long")
     .nullable()
-    .transform(val => val === "" ? undefined : val),
+    .optional(),
   sort: z
     .enum(["trending", "recent"])
+    .optional()
     .catch("recent"), // Automatically falls back to 'recent' if a user modifies the URL manually
 });
 
