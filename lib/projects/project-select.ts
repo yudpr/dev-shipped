@@ -2,7 +2,7 @@ import { searchParamsSchema, type SearchParamsType } from "@/components/organism
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
+import { and, count, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 import z from "zod";
 
@@ -132,22 +132,25 @@ export async function getProjectBySlug(slug: string) {
 
 export type ExploreProjectSuccess = {
   success: true,
-  data: (
-    & Pick<InferSelectModel<typeof projects>, 
-      | "id" 
-      | "name" 
-      | "slug"
-      | "description"
-      | "tags"
-      | "voteCount"
-      | "createdAt"
-      > 
-    & { 
-        userVote: 
-          | Pick<InferSelectModel<typeof votes>, "voteType">["voteType"] 
-          | null
-      }
-  )[]
+  data: {
+    items: (
+      & Pick<InferSelectModel<typeof projects>, 
+        | "id" 
+        | "name" 
+        | "slug"
+        | "description"
+        | "tags"
+        | "voteCount"
+        | "createdAt"
+        > 
+      & { 
+          userVote: 
+            | Pick<InferSelectModel<typeof votes>, "voteType">["voteType"] 
+            | null
+        }
+    )[],
+    totalItems?: number
+  }
 }
 
 type ExploreProjectFailed = {
@@ -172,6 +175,21 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
 
   const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
 
+  const whereCondition = searchQuery
+    ? (
+        and(
+          eq(projects.status, "approved"),
+          or(
+            ilike(projects.name, `%${searchQuery}%`),
+            sql`EXISTS (
+              SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
+              WHERE tag ILIKE ${searchQuery}
+            )` // switched to this form because earlier form has no settings for disabling case-sensitivity
+          )
+        )
+      )
+    : eq(projects.status, "approved")
+
   let baseQuery = db
     .select({
       id: projects.id,
@@ -194,33 +212,33 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
           : sql`false`
       )
     )
-    .where(
-      searchQuery
-        ? (
-            and(
-              eq(projects.status, "approved"),
-              or(
-                ilike(projects.name, `%${searchQuery}%`),
-                sql`EXISTS (
-                  SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
-                  WHERE tag ILIKE ${searchQuery}
-                )` // switched to this form because earlier form has no settings for disabling case-sensitivity
-              )
-            )
-          )
-        : eq(projects.status, "approved")
-    )
+    .where(whereCondition)
     .$dynamic()
     
   baseQuery = orderBy === "trending" 
     ? baseQuery.orderBy(desc(projects.voteCount))
     : baseQuery.orderBy(desc(projects.createdAt))
 
-  const result = await baseQuery
 
+  const countQuery = db.select({ total: count() })
+    .from(projects)
+    .where(whereCondition)
+  
+  const [ results, counts ] = await Promise.all([ 
+    baseQuery, 
+    searchQuery 
+      ? countQuery
+      : Promise.resolve(null) 
+  ])
+  
   return {
     success: true,
-    data: result
+    data: {
+      items: results,
+      totalItems: counts 
+        ? counts[0]?.total ?? undefined
+        : undefined
+    }
   }
 }
 

@@ -61,7 +61,9 @@ function useSearchProject() {
   }
 }
 
-export default function ExploreSearch() {
+export default function ExploreSearch({
+  totalItems
+}:{ totalItems?: number }) {
   const searchProject = useSearchProject()
   return (
     <div className="space-y-5">
@@ -83,9 +85,9 @@ export default function ExploreSearch() {
                       <Spinner className="size-5 stroke-3"/>
                     </InputGroupAddon>
                   )
-                : (
+                : totalItems && (
                     <InputGroupAddon align="inline-end" className="hidden sm:inline">
-                      12 result(s)
+                      {totalItems} result(s)
                     </InputGroupAddon>
                   )
             }
@@ -133,12 +135,12 @@ export default function ExploreSearch() {
                 <MarkerContent className="text-sm font-medium text-muted-foreground">Searching...</MarkerContent>
               </Marker>
             )
-          : (
+          : totalItems && (
               <Marker variant="separator" className="sm:hidden">
                 <MarkerIcon>
                   <Search />
                 </MarkerIcon>
-                <MarkerContent className="text-sm font-medium text-muted-foreground">12 result(s)</MarkerContent>
+                <MarkerContent className="text-sm font-medium text-muted-foreground">{totalItems} result(s)</MarkerContent>
               </Marker>
             )
       }
