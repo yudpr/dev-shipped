@@ -2,11 +2,13 @@
 
 import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 import { formSchema } from "@/components/molecules/project-submit-form.schema";
+import { SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq, sql } from "drizzle-orm";
 import { refresh } from "next/cache";
+import { CursorType, getExploreProjects } from "./project-select";
 
 type ActionResult =
   | { success: false, error: string }
@@ -264,4 +266,11 @@ export const projectVotingAction = async (
     console.error(error)
     return { success: false, error: "Could not sync your vote with our database servers." }
   }
+}
+
+export const loadMoreExploreProjects = async (
+  searchParams: SearchParamsType, 
+  cursor: CursorType
+) => {
+  return await getExploreProjects(searchParams, cursor)
 }

@@ -4,7 +4,6 @@ import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, count, desc, eq, ilike, InferSelectModel, lt, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
-import z from "zod";
 
 export async function getFeaturedProjects() {
   /**
@@ -130,6 +129,12 @@ export async function getProjectBySlug(slug: string) {
   return project
 }
 
+export type CursorType = {
+  id: number,
+  createdAt: Date,
+  voteCount: number
+}
+
 export type ExploreProjectSuccess = {
   success: true,
   data: {
@@ -149,7 +154,8 @@ export type ExploreProjectSuccess = {
             | null
         }
     )[],
-    totalItems?: number
+    totalItems?: number,
+    nextCursor: CursorType | null
   }
 }
 
@@ -160,117 +166,124 @@ type ExploreProjectFailed = {
 
 type ExploreProjectResult = ExploreProjectFailed | ExploreProjectSuccess
 
-export type CursorType = {
-  id: number,
-  createdAt: Date,
-  voteCount: number
-}
-
 export async function getExploreProjects(
   searchParams: SearchParamsType,
   cursor: CursorType | null
 ): Promise<ExploreProjectResult> {
+  const PAGE_SIZE = 10
+
   try {
-  const { userId } = await auth()
+    const { userId } = await auth()
 
-  const searchParamsValidation = searchParamsSchema.safeParse(searchParams)
+    const searchParamsValidation = searchParamsSchema.safeParse(searchParams)
 
-  if (!searchParamsValidation.success) {
-    return {
-      success: false,
-      error: "Validation error: " + searchParamsValidation.error.issues.map(i => i.message).join("; ") + "."
+    if (!searchParamsValidation.success) {
+      return {
+        success: false,
+        error: "Validation error: " + searchParamsValidation.error.issues.map(i => i.message).join("; ") + "."
+      }
     }
-  }
 
-  const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
+    const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
 
-  const cursorFilter = cursor
-    ? orderBy === "trending"
-      ? or(
-          lt(projects.voteCount, cursor.voteCount),
-          and(eq(projects.voteCount, cursor.voteCount), lt(projects.id, cursor.id))
+    const cursorFilter = cursor
+      ? orderBy === "trending"
+        ? or(
+            lt(projects.voteCount, cursor.voteCount),
+            and(eq(projects.voteCount, cursor.voteCount), lt(projects.id, cursor.id))
+          )
+        : or(
+            lt(projects.createdAt, cursor.createdAt),
+            and(eq(projects.createdAt, cursor.createdAt), lt(projects.id, cursor.id))
+          )
+      : undefined
+
+    const whereCondition = searchQuery
+      ? (
+          and(
+            eq(projects.status, "approved"),
+            or(
+              ilike(projects.name, `%${searchQuery}%`),
+              sql`EXISTS (
+                SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
+                WHERE tag ILIKE ${searchQuery}
+              )` // switched to this form because earlier form has no settings for disabling case-sensitivity
+            ),
+            cursorFilter
+          )
         )
-      : or(
-          lt(projects.createdAt, cursor.createdAt),
-          and(eq(projects.createdAt, cursor.createdAt), lt(projects.id, cursor.id))
-        )
-    : undefined
-
-  const whereCondition = searchQuery
-    ? (
-        and(
+      : and(
           eq(projects.status, "approved"),
-          or(
-            ilike(projects.name, `%${searchQuery}%`),
-            sql`EXISTS (
-              SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
-              WHERE tag ILIKE ${searchQuery}
-            )` // switched to this form because earlier form has no settings for disabling case-sensitivity
-          ),
           cursorFilter
         )
-      )
-    : and(
-        eq(projects.status, "approved"),
-        cursorFilter
-      )
 
-  let baseQuery = db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      slug: projects.slug,
-      description: projects.description,
-      tags: projects.tags,
-      voteCount: projects.voteCount,
-      userVote: votes.voteType,
-      createdAt: projects.createdAt
-    })
-    .from(projects)
-    .limit(10)
-    .leftJoin(
-      votes,
-      and(
-        eq(votes.projectId, projects.id),
-        userId 
-          ? eq(votes.userId, userId)
-          : sql`false`
+    let baseQuery = db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        slug: projects.slug,
+        description: projects.description,
+        tags: projects.tags,
+        voteCount: projects.voteCount,
+        userVote: votes.voteType,
+        createdAt: projects.createdAt
+      })
+      .from(projects)
+      .limit(10)
+      .leftJoin(
+        votes,
+        and(
+          eq(votes.projectId, projects.id),
+          userId 
+            ? eq(votes.userId, userId)
+            : sql`false`
+        )
       )
-    )
-    .where(whereCondition)
-    .$dynamic()
+      .where(whereCondition)
+      .$dynamic()
+      
+    baseQuery = orderBy === "trending" 
+      ? baseQuery.orderBy(desc(projects.voteCount))
+      : baseQuery.orderBy(desc(projects.createdAt))
+
+
+    const countQuery = db.select({ total: count() })
+      .from(projects)
+      .where(whereCondition)
     
-  baseQuery = orderBy === "trending" 
-    ? baseQuery.orderBy(desc(projects.voteCount))
-    : baseQuery.orderBy(desc(projects.createdAt))
+    const [ results, counts ] = await Promise.all([ 
+      baseQuery, 
+      searchQuery 
+        ? countQuery
+        : Promise.resolve(null) 
+    ])
 
+    const hasMore = results.length > PAGE_SIZE
+    const items = hasMore? results.slice(0, PAGE_SIZE): results
+    const lastItem = items.at(-1)
 
-  const countQuery = db.select({ total: count() })
-    .from(projects)
-    .where(whereCondition)
-  
-  const [ results, counts ] = await Promise.all([ 
-    baseQuery, 
-    searchQuery 
-      ? countQuery
-      : Promise.resolve(null) 
-  ])
-  
-  return {
-    success: true,
-    data: {
-      items: results,
-      totalItems: counts 
-        ? counts[0]?.total ?? undefined
-        : undefined
+    return {
+      success: true,
+      data: {
+        items,
+        totalItems: counts 
+          ? counts[0]?.total ?? undefined
+          : undefined,
+        nextCursor: hasMore && lastItem
+          ? { 
+              id: lastItem.id, 
+              createdAt: lastItem.createdAt, 
+              voteCount: lastItem.voteCount
+            }
+          : null
+      }
     }
-  }
   } catch (error) {
     console.error(error)
-    
+
     return {
       success: false,
-      error: "Server error occured"
+      error: "Server error occurred."
     }
   }
 }

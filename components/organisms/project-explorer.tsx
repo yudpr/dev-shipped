@@ -1,19 +1,9 @@
-import { Compass, FaceSlightlyFrowning, LucideIcon, WifiOff } from "lucide-react";
 import ExploreSearch from "../molecules/explore-search";
-import ProjectCardGroup from "./project-card-group";
 import { ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
 import { Suspense } from "react";
-import ProjectCard from "../molecules/project-card";
 import SkeletonLoading from "../atoms/skeleton-loading";
 import { type ExplorePageProps } from "@/app/explore/page";
-
-type EmptyStateMessageType =
-  | undefined
-  | {
-      title: string,
-      description: string,
-      icon: LucideIcon
-    }
+import ExploreInfinite, { type EmptyStateMessageType } from "../molecules/explore-infinite";
 
 export default function ProjectExplorerSection(props: ExplorePageProps) {
   return(
@@ -50,52 +40,55 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
   let projects: ExploreProjectSuccess["data"]["items"] = []
   let emptyStateMessage: EmptyStateMessageType
   let totalItems: number | undefined
+  let nextCursor = null
+  let queries
 
   try {
     const params = await searchParams
+    queries = params
     const result = await getExploreProjects(params, null)
     
     if (result.success && result.data.items.length) {
       projects = result.data.items
       totalItems = result.data.totalItems
+      nextCursor = result.data.nextCursor
     } else if (result.success && !result.data.items.length && params.query) {
       emptyStateMessage = {
+        type: "notFound", // type needs to be added and get the icon in explore-infinite, because can't pass LucideIcon from RSC to client component
         title: "No projects found",
         description: "We couldn't find anything matching your search. Try checking your spelling, broadening your terms, or clearing your filters.",
-        icon: Compass
       }
     } else if (result.success && !result.data.items.length && !params.query){
       emptyStateMessage = {
+        type: "emptyFeed",
         title: "Empty feed",
         description: "No active projects are registered on this dashboard yet. Once a project is added, it will populate here instantly.",
-        icon: Compass
       }
     } else if (!result.success){
       emptyStateMessage = {
+        type: "fetchError",
         title: "Cannot process your queries",
-        description: result.error,
-        icon: FaceSlightlyFrowning
+        description: result.error, // not moving the entire empty messages because, this value is the only message that is taken from get-explore-projects. It seems doing it this way easier than passing it to the prop.
       }
     } 
 
   } catch {
     emptyStateMessage = {
+      type: "networkError",
       title: "Connection interrupted",
       description: " We couldn't load this page because your internet connection is a bit unstable. Please check your signal and try again.",
-      icon: WifiOff
     }
   }
-
+  
   return (
     <>
       <ExploreSearch totalItems={totalItems}/>
-      <ProjectCardGroup 
-        emptyStateDescription={emptyStateMessage?.description}
-        emptyStateTitle={emptyStateMessage?.title}
-        emptyStateIcon={emptyStateMessage?.icon}
-      >
-      { projects && projects.map(i => <ProjectCard {...i} key={i.id}/>)} 
-      </ProjectCardGroup>
+      <ExploreInfinite
+        key={`${queries?.query ?? ""}-${queries ?? ""}`} // To refresh the component every params changes instead of just props.
+        projects={projects}
+        nextCursor={nextCursor}
+        emptyStateMessage={emptyStateMessage}
+      />
     </>
   )
 }

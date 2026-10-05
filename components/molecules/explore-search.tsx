@@ -73,6 +73,7 @@ export default function ExploreSearch({
               placeholder="Explore projects..." 
               onChange={searchProject.handleSearch} 
               defaultValue={searchProject.searchParams.get("query")?.toString()}
+              autoComplete="off"
             />
             <InputGroupAddon>
               <Compass />

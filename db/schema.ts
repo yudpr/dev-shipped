@@ -32,7 +32,7 @@ export const projects = pgTable(
     voteCount: integer("vote_count").notNull().default(0),
 
     // Metadata
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
     status: statusEnum("status").default("pending").notNull(), 
     submittedBy: varchar("submitted_by", { length: 120 }).default("anonymous"),
