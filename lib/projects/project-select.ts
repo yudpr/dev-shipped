@@ -1,4 +1,4 @@
-import { searchParamsSchema, type SearchParamsType } from "@/components/organisms/project-explorer.schema";
+import { cursorSchema, searchParamsSchema, type SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
@@ -184,29 +184,40 @@ export async function getExploreProjects(
       }
     }
 
+    const cursorValidation = cursorSchema.safeParse(cursor)
+
+    if (!cursorValidation.success && cursor !== null) {
+      return {
+        success: false,
+        error: "Validation error: " + cursorValidation.error.issues.map(i => i.message).join("; ") + "."
+      }
+    }
+
     const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
 
-    const cursorFilter = cursor
+    const cursorFilter = cursorValidation.data
       ? orderBy === "trending"
         ? or(
-            lt(projects.voteCount, cursor.voteCount),
-            and(eq(projects.voteCount, cursor.voteCount), lt(projects.id, cursor.id))
+            lt(projects.voteCount, cursorValidation.data.voteCount),
+            and(eq(projects.voteCount, cursorValidation.data.voteCount), lt(projects.id, cursorValidation.data.id))
           )
         : or(
-            lt(projects.createdAt, cursor.createdAt),
-            and(eq(projects.createdAt, cursor.createdAt), lt(projects.id, cursor.id))
+            lt(projects.createdAt, cursorValidation.data.createdAt),
+            and(eq(projects.createdAt, cursorValidation.data.createdAt), lt(projects.id, cursorValidation.data.id))
           )
       : undefined
+
+    const partialSearchQuery = `%${searchQuery}%`;
 
     const whereCondition = searchQuery
       ? (
           and(
             eq(projects.status, "approved"),
             or(
-              ilike(projects.name, `%${searchQuery}%`),
+              ilike(projects.name, partialSearchQuery),
               sql`EXISTS (
                 SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
-                WHERE tag ILIKE ${searchQuery}
+                WHERE tag ILIKE ${partialSearchQuery}
               )` // switched to this form because earlier form has no settings for disabling case-sensitivity
             ),
             cursorFilter
@@ -229,7 +240,7 @@ export async function getExploreProjects(
         createdAt: projects.createdAt
       })
       .from(projects)
-      .limit(10)
+      .limit(PAGE_SIZE + 1)
       .leftJoin(
         votes,
         and(
@@ -243,13 +254,13 @@ export async function getExploreProjects(
       .$dynamic()
       
     baseQuery = orderBy === "trending" 
-      ? baseQuery.orderBy(desc(projects.voteCount))
-      : baseQuery.orderBy(desc(projects.createdAt))
+      ? baseQuery.orderBy(desc(projects.voteCount), desc(projects.id)) // Two colums order with 'id' as an addition, in case of 'createdAt' or 'voteCount' ties.
+      : baseQuery.orderBy(desc(projects.createdAt), desc(projects.id))
 
 
     const countQuery = db.select({ total: count() })
       .from(projects)
-      .where(whereCondition)
+      .where(whereCondition) // potentially wrong result
     
     const [ results, counts ] = await Promise.all([ 
       baseQuery, 

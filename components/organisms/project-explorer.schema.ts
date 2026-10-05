@@ -13,4 +13,13 @@ export const searchParamsSchema = z.object({
     .catch("recent"), // Automatically falls back to 'recent' if a user modifies the URL manually
 });
 
+export const cursorSchema = z.object({
+  id: z
+    .number(),
+  createdAt: z
+    .date(),
+  voteCount: z
+    .number()
+})
+
 export type SearchParamsType = z.infer<typeof searchParamsSchema>

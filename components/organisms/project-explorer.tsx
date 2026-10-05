@@ -1,5 +1,5 @@
 import ExploreSearch from "../molecules/explore-search";
-import { CursorType, ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
+import { type CursorType, type ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
 import { Suspense } from "react";
 import SkeletonLoading from "../atoms/skeleton-loading";
 import { type ExplorePageProps } from "@/app/explore/page";
