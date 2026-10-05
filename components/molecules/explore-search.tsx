@@ -52,7 +52,6 @@ function useSearchProject() {
   return {
     handleOrder,
     handleSearch,
-    setSort,
     searchParams,
     state: {
       sort,

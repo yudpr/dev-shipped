@@ -53,7 +53,7 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
 
   try {
     const params = await searchParams
-    const result = await getExploreProjects(params)
+    const result = await getExploreProjects(params, null)
     
     if (result.success && result.data.items.length) {
       projects = result.data.items
@@ -73,7 +73,7 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
     } else if (!result.success){
       emptyStateMessage = {
         title: "Cannot process your queries",
-        description: result.errors.map(i => i.message).join("; ") + ".",
+        description: result.error,
         icon: FaceSlightlyFrowning
       }
     } 

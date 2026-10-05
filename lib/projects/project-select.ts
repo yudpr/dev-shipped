@@ -2,7 +2,7 @@ import { searchParamsSchema, type SearchParamsType } from "@/components/organism
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, count, desc, eq, ilike, InferSelectModel, or, sql, } from "drizzle-orm";
+import { and, count, desc, eq, ilike, InferSelectModel, lt, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 import z from "zod";
 
@@ -155,13 +155,22 @@ export type ExploreProjectSuccess = {
 
 type ExploreProjectFailed = {
   success: false,
-  errors: z.ZodError["issues"]
+  error: string
 }
 
 type ExploreProjectResult = ExploreProjectFailed | ExploreProjectSuccess
 
-export async function getExploreProjects(searchParams: SearchParamsType): Promise<ExploreProjectResult> {
+export type CursorType = {
+  id: number,
+  createdAt: Date,
+  voteCount: number
+}
 
+export async function getExploreProjects(
+  searchParams: SearchParamsType,
+  cursor: CursorType | null
+): Promise<ExploreProjectResult> {
+  try {
   const { userId } = await auth()
 
   const searchParamsValidation = searchParamsSchema.safeParse(searchParams)
@@ -169,11 +178,23 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
   if (!searchParamsValidation.success) {
     return {
       success: false,
-      errors: searchParamsValidation.error.issues
+      error: "Validation error: " + searchParamsValidation.error.issues.map(i => i.message).join("; ") + "."
     }
   }
 
   const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
+
+  const cursorFilter = cursor
+    ? orderBy === "trending"
+      ? or(
+          lt(projects.voteCount, cursor.voteCount),
+          and(eq(projects.voteCount, cursor.voteCount), lt(projects.id, cursor.id))
+        )
+      : or(
+          lt(projects.createdAt, cursor.createdAt),
+          and(eq(projects.createdAt, cursor.createdAt), lt(projects.id, cursor.id))
+        )
+    : undefined
 
   const whereCondition = searchQuery
     ? (
@@ -185,10 +206,14 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
               SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
               WHERE tag ILIKE ${searchQuery}
             )` // switched to this form because earlier form has no settings for disabling case-sensitivity
-          )
+          ),
+          cursorFilter
         )
       )
-    : eq(projects.status, "approved")
+    : and(
+        eq(projects.status, "approved"),
+        cursorFilter
+      )
 
   let baseQuery = db
     .select({
@@ -238,6 +263,14 @@ export async function getExploreProjects(searchParams: SearchParamsType): Promis
       totalItems: counts 
         ? counts[0]?.total ?? undefined
         : undefined
+    }
+  }
+  } catch (error) {
+    console.error(error)
+    
+    return {
+      success: false,
+      error: "Server error occured"
     }
   }
 }
