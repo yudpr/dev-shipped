@@ -1,5 +1,5 @@
 import ExploreSearch from "../molecules/explore-search";
-import { ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
+import { CursorType, ExploreProjectSuccess, getExploreProjects } from "@/lib/projects/project-select";
 import { Suspense } from "react";
 import SkeletonLoading from "../atoms/skeleton-loading";
 import { type ExplorePageProps } from "@/app/explore/page";
@@ -40,8 +40,8 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
   let projects: ExploreProjectSuccess["data"]["items"] = []
   let emptyStateMessage: EmptyStateMessageType
   let totalItems: number | undefined
-  let nextCursor = null
-  let queries
+  let nextCursor: CursorType | null = null
+  let queries: Awaited<ExplorePageProps["searchParams"]> | null = null
 
   try {
     const params = await searchParams
@@ -84,7 +84,7 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
     <>
       <ExploreSearch totalItems={totalItems}/>
       <ExploreInfinite
-        key={`${queries?.query ?? ""}-${queries ?? ""}`} // To refresh the component every params changes instead of just props.
+        key={`${queries?.query ?? ""}-${queries?.sort ?? ""}`} // To refresh the component every params changes instead of just props.
         projects={projects}
         nextCursor={nextCursor}
         emptyStateMessage={emptyStateMessage}

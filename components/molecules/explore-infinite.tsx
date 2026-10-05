@@ -41,7 +41,7 @@ export default function ExploreInfinite({
         emptyStateTitle={emptyStateMessage?.title}
         emptyStateIcon={emptyStateMessage?.type && emptyStateIconDict[emptyStateMessage.type]}
       >
-        { projects && projects.map((i, index) => <ProjectCard {...i} key={index}/>)}
+        { projects && projects.map(i => <ProjectCard {...i} key={i.id}/>)}
       </ProjectCardGroup>
 
     </>
