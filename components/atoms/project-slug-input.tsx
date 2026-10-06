@@ -41,24 +41,17 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
     setIsChecking(true)
     setIsSlugAvailable(null)
 
-    try {
-      const result = await checkSlugAvailability(slug)
-      
-      if (id !== requestId.current) return
+    const result = await checkSlugAvailability(slug)
+    
+    if (id !== requestId.current) return
 
-      setIsChecking(false)
-      if (!result.success) {
-        formReactHook.setError("slug", { message: result.error })
-        return 
-      }
-      setIsSlugAvailable(result?.data?.isSlugAvailable ?? null)
-    } catch {
-      if (id === requestId.current) {
-        formReactHook.setError("slug", { message:  "Network error occured. Please try again."})
-        setIsChecking(false)
-        setIsSlugAvailable(false)
-      }
+    setIsChecking(false)
+    if (!result.success) {
+      formReactHook.setError("slug", { message: result.error })
+      return 
     }
+    setIsSlugAvailable(result?.data?.isSlugAvailable ?? null)
+
   }, [ formReactHook ])
 
 

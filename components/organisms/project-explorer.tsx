@@ -44,40 +44,31 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
 
   const params = await searchParams
 
-  try {
-    const result = await getExploreProjects(params, null)
-    
-    if (result.success && result.data.items.length) {
-      projects = result.data.items
-      totalItems = result.data.totalItems
-      nextCursor = result.data.nextCursor
-    } else if (result.success && !result.data.items.length && params.query) {
-      emptyStateMessage = {
-        type: "notFound", // type needs to be added and get the icon in explore-infinite, because can't pass LucideIcon from RSC to client component
-        title: "No projects found",
-        description: "We couldn't find anything matching your search. Try checking your spelling, broadening your terms, or clearing your filters.",
-      }
-    } else if (result.success && !result.data.items.length && !params.query){
-      emptyStateMessage = {
-        type: "emptyFeed",
-        title: "Empty feed",
-        description: "No active projects are registered on this dashboard yet. Once a project is added, it will populate here instantly.",
-      }
-    } else if (!result.success){
-      emptyStateMessage = {
-        type: "fetchError",
-        title: "Cannot process your queries",
-        description: result.error, // not moving the entire empty messages because, this value is the only message that is taken from get-explore-projects. It seems doing it this way easier than passing it to the prop.
-      }
-    } 
-
-  } catch {
+  const result = await getExploreProjects(params, null)
+  
+  if (result.success && result.data.items.length) {
+    projects = result.data.items
+    totalItems = result.data.totalItems
+    nextCursor = result.data.nextCursor
+  } else if (result.success && !result.data.items.length && params.query) {
     emptyStateMessage = {
-      type: "networkError",
-      title: "Connection interrupted",
-      description: " We couldn't load this page because your internet connection is a bit unstable. Please check your signal and try again.",
+      type: "notFound", // type needs to be added and get the icon in explore-infinite, because can't pass LucideIcon from RSC to client component
+      title: "No projects found",
+      description: "We couldn't find anything matching your search. Try checking your spelling, broadening your terms, or clearing your filters.",
     }
-  }
+  } else if (result.success && !result.data.items.length && !params.query){
+    emptyStateMessage = {
+      type: "emptyFeed",
+      title: "Empty feed",
+      description: "No active projects are registered on this dashboard yet. Once a project is added, it will populate here instantly.",
+    }
+  } else if (!result.success){
+    emptyStateMessage = {
+      type: "fetchError",
+      title: "Cannot process your queries",
+      description: result.error, // not moving the entire empty messages because, this value is the only message that is taken from get-explore-projects. It seems doing it this way easier than passing it to the prop.
+    }
+  } 
   
   return (
     <>

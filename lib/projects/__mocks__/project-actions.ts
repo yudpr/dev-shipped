@@ -15,6 +15,6 @@ export const projectVotingAction = async () => {
   return { success: true }
 }
 
-export function loadMoreExploreProjects() {
+export const loadMoreExploreProjects = async () => {
   return getExploreProjects()
 }

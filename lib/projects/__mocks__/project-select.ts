@@ -29,9 +29,9 @@ export function getProjectBySlug() {
 
 const items = [
   {
-    createdAt: Date.now(),
+    createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 9,
+    id: 1,
     name: "Markdownify1",
     slug: "markdownify1",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
@@ -39,9 +39,9 @@ const items = [
     voteCount: 365
   },
   {
-    createdAt: Date.now(),
+    createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 9,
+    id: 2,
     name: "Markdownify2",
     slug: "markdownify2",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
@@ -49,9 +49,9 @@ const items = [
     voteCount: 265
   },
   {
-    createdAt: Date.now(),
+    createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 9,
+    id: 3,
     name: "Markdownify3",
     slug: "markdownify3",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],

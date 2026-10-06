@@ -43,18 +43,15 @@ function useExploreInfinite(
     if (!cursor || isPending) return
 
     startTransition(async () => {
-      try {
-        const result = await loadMoreExploreProjects(params, cursor)
-
-        if (!result.success) {
-          // show result.error with sonner
-        } else {
-          setProjects(prev => [ ...prev, ...result.data.items])
-          setCursor(result.data.nextCursor)
-        }
-      } catch {
-        // show network error with sonner
+      const result = await loadMoreExploreProjects(params, cursor)
+      
+      if (!result.success) {
+        // show result.error with sonner
+      } else {
+        setProjects(prev => [ ...prev, ...result.data.items])
+        setCursor(result.data.nextCursor)
       }
+    
     })
   }, [cursor, isPending, params])
 

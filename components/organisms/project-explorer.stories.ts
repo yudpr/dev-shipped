@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite"
 import ProjectExplorer from "./project-explorer";
-import { type ExplorePageProps } from "../../app/explore/page"
+import { type ExplorePageProps } from "@/app/explore/page"
 
 type ProjectExplorerType = typeof ProjectExplorer
 

@@ -170,7 +170,7 @@ export async function getExploreProjects(
   searchParams: SearchParamsType,
   cursor: CursorType | null
 ): Promise<ExploreProjectResult> {
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 2
 
   try {
     const { userId } = await auth()
@@ -264,7 +264,7 @@ export async function getExploreProjects(
     
     const [ results, counts ] = await Promise.all([ 
       baseQuery, 
-      searchQuery 
+      searchQuery && cursor === null // count will only visible when search query is filled and cursor is null. That means, triggering scroll sentinel won't change the count.
         ? countQuery
         : Promise.resolve(null) 
     ])
@@ -272,7 +272,7 @@ export async function getExploreProjects(
     const hasMore = results.length > PAGE_SIZE
     const items = hasMore? results.slice(0, PAGE_SIZE): results
     const lastItem = items.at(-1)
-    console.log(lastItem)
+    
     return {
       success: true,
       data: {
