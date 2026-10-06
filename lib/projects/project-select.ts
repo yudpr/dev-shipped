@@ -2,7 +2,7 @@ import { cursorSchema, searchParamsSchema, type SearchParamsType } from "@/compo
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, count, desc, eq, ilike, InferSelectModel, lt, or, sql, } from "drizzle-orm";
+import { and, count, desc, eq, ilike, type InferSelectModel, lt, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
 
 export async function getFeaturedProjects() {
@@ -170,7 +170,7 @@ export async function getExploreProjects(
   searchParams: SearchParamsType,
   cursor: CursorType | null
 ): Promise<ExploreProjectResult> {
-  const PAGE_SIZE = 2
+  const PAGE_SIZE = 10
 
   try {
     const { userId } = await auth()

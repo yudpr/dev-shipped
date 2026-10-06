@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import { UsersRound } from "lucide-react";
 import HeroStats from "./hero-stats";
 

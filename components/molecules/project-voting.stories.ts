@@ -1,4 +1,4 @@
-import { StoryObj, type Meta } from '@storybook/nextjs-vite';
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 
 import ProjectVoting from './project-voting';
 

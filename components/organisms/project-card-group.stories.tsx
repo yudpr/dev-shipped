@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import ProjectCard, { type ProjectCardProps } from "../molecules/project-card";
 import ProjectCardGroup from "./project-card-group";
 import { Rocket } from "lucide-react";

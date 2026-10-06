@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite"
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import ExploreSearch from "./explore-search";
 
 type ExploreSearchType = typeof ExploreSearch

@@ -26,3 +26,47 @@ export function getProjectBySlug() {
     userVote: "votes_voteType"
   }
 }
+
+const items = [
+  {
+    createdAt: Date.now(),
+    description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
+    id: 9,
+    name: "Markdownify1",
+    slug: "markdownify1",
+    tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
+    userVote: "up",
+    voteCount: 365
+  },
+  {
+    createdAt: Date.now(),
+    description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
+    id: 9,
+    name: "Markdownify2",
+    slug: "markdownify2",
+    tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
+    userVote: "up",
+    voteCount: 265
+  },
+  {
+    createdAt: Date.now(),
+    description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
+    id: 9,
+    name: "Markdownify3",
+    slug: "markdownify3",
+    tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
+    userVote: "up",
+    voteCount: 165
+  }
+]
+
+export function getExploreProjects() {
+  return { 
+    success: true,
+    data: {
+      items,
+      totalItems: 3,
+      nextCursor: null
+    }
+  }
+}

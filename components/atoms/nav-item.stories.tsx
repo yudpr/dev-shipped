@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import NavItem from "./nav-item";
 import { Home } from "lucide-react";
 import { NavigationMenu, NavigationMenuList } from "../ui/navigation-menu";

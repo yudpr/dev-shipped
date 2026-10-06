@@ -1,7 +1,7 @@
 import { Rocket } from "lucide-react";
 import HeroStats from "../atoms/hero-stats";
 import HeroStatsGroup from "./hero-stats-group";
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 
 const heroStatsItems = [
    {

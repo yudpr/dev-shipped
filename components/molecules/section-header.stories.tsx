@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import SectionHeader from "./section-header";
 import CustomButton from "../atoms/custom-button";
 import { ArrowUpRight, Star } from "lucide-react";
