@@ -2,13 +2,13 @@
 
 import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 import { formSchema } from "@/components/molecules/project-submit-form.schema";
-import { type SearchParamsType } from "@/components/organisms/project-explorer.schema";
+import { SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq, sql } from "drizzle-orm";
 import { refresh } from "next/cache";
-import { type CursorType, getExploreProjects } from "./project-select";
+import { CursorType, getExploreProjects } from "./project-select";
 
 type ActionResult =
   | { success: false, error: string }

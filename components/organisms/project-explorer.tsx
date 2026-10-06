@@ -41,11 +41,10 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
   let emptyStateMessage: EmptyStateMessageType
   let totalItems: number | undefined
   let nextCursor: CursorType | null = null
-  let queries: Awaited<ExplorePageProps["searchParams"]> | null = null
+
+  const params = await searchParams
 
   try {
-    const params = await searchParams
-    queries = params
     const result = await getExploreProjects(params, null)
     
     if (result.success && result.data.items.length) {
@@ -84,10 +83,11 @@ async function ProjectExplorer({searchParams}: ExplorePageProps) {
     <>
       <ExploreSearch totalItems={totalItems}/>
       <ExploreInfinite
-        key={`${queries?.query ?? ""}-${queries?.sort ?? ""}`} // To refresh the component every params changes instead of just props.
+        key={`${params.query ?? ""}-${params.sort ?? ""}`} // To refresh the component every params changes instead of just props.
         projects={projects}
         nextCursor={nextCursor}
         emptyStateMessage={emptyStateMessage}
+        params={params}
       />
     </>
   )

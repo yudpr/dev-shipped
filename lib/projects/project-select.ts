@@ -170,7 +170,7 @@ export async function getExploreProjects(
   searchParams: SearchParamsType,
   cursor: CursorType | null
 ): Promise<ExploreProjectResult> {
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 2
 
   try {
     const { userId } = await auth()
@@ -240,7 +240,7 @@ export async function getExploreProjects(
         createdAt: projects.createdAt
       })
       .from(projects)
-      .limit(PAGE_SIZE + 1)
+      .limit(PAGE_SIZE + 1) // fetch one extra to know if there's a next page, cheaply
       .leftJoin(
         votes,
         and(
@@ -272,7 +272,7 @@ export async function getExploreProjects(
     const hasMore = results.length > PAGE_SIZE
     const items = hasMore? results.slice(0, PAGE_SIZE): results
     const lastItem = items.at(-1)
-
+    console.log(lastItem)
     return {
       success: true,
       data: {

@@ -33,7 +33,11 @@ function useSearchProject() {
     })
   }, 400)
 
-  const [ sort, setSort ] = useState<SearchParamsType["sort"]>("recent")
+  const sortInitialValue = searchParams.get("sort") === "trending"
+    ? "trending"
+    : "recent"
+
+  const [ sort, setSort ] = useState<SearchParamsType["sort"]>(sortInitialValue)
 
   const handleOrder = useCallback((sortType: SearchParamsType["sort"]) => {
     const params = new URLSearchParams(searchParams)
