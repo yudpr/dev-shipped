@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import ProjectCardLink from "./project-card-link";
 
 type ProjectCardLinkType = typeof ProjectCardLink
@@ -6,6 +6,10 @@ type ProjectCardLinkType = typeof ProjectCardLink
 const meta: Meta<ProjectCardLinkType> = {
   title: "Atoms/Project Card Link",
   component: ProjectCardLink,
+  args: {
+    name: "Name1",
+    slug: "name1",
+  },
   tags: ["autodocs"]
 }
 
