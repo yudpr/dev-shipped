@@ -52,7 +52,10 @@ function useSlugLiveChecking(formReactHook : UseFormReturn<ProjectSubmitFormData
         return 
       }
       setIsSlugAvailable(result.data?.isSlugAvailable ?? null)
-    } catch {
+    } catch (error) {
+      if (id !== requestId.current) return
+      
+      console.error(error)
       setIsChecking(false)
       formReactHook.setError("slug", { message: "Network error. Please check your connection, then try again." })
     }
