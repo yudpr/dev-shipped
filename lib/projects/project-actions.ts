@@ -59,8 +59,8 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
         shouldSyncWorkspace: result.data.sync.shouldSyncWorkspace,
         newOrgId: result.data.sync.newOrgId
       }
+      targetOrgId = sync.newOrgId
     }
-
     const validatedData = formSchema.safeParse(data)
 
     if (!validatedData.success) {
