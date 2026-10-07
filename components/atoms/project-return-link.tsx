@@ -17,13 +17,11 @@ export default function ProjectReturnLink() {
 function ProjectReturnLinkView() {
   const searchParams = useSearchParams()
   const returnParams = searchParams.get("returnParams")
-  const decodedReturnParams = returnParams ? decodeURIComponent(returnParams) : ""
 
   return (
     <Link 
-      href={`/explore?${decodedReturnParams}`}
+      href={`/explore?${returnParams ?? ""}`}
       className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-      scroll={false}
     >
       <ArrowLeft className="size-4"/>
       Back to Explore
