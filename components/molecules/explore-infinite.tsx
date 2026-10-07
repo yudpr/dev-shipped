@@ -107,9 +107,11 @@ export default function ExploreInfinite({
         { !!exploreInfinite.state.projects.length && exploreInfinite.state.projects.map(i => <ProjectCard {...i} key={i.id}/>)}
       </ProjectCardGroup>
         { 
-          exploreInfinite.state.cursor && exploreInfinite.state.needRetry 
-            ? <RetryLoadingMoreProjects onClick={() => exploreInfinite.setNeedRetry(false)}/> 
-            : <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects} />
+          exploreInfinite.state.cursor && (
+            exploreInfinite.state.needRetry 
+              ? <RetryLoadingMoreProjects onClick={() => exploreInfinite.setNeedRetry(false)}/> 
+              : <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects} />
+          )
         }
         { exploreInfinite.state.isPending && <LoadingMoreProjects />}
     </>
