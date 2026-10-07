@@ -17,7 +17,7 @@ export const cursorSchema = z.object({
   id: z
     .number(),
   createdAt: z
-    .date(),
+    .date(), // Server action is not just a mere function. It is a post method that looks like a function. Behind the scene, server action serializes the JS Object with React's Flight Protocol, not JSON, and React restores the original JS object on the other side. For example, a Date arrives. as a Date. If you had a Zod error means the value did not come through the flight payload such as a URL param, JSON.parse, a non-React caller. Zod '.coerce' hides that and widens the schema to accept strings.
   voteCount: z
     .number()
 })
