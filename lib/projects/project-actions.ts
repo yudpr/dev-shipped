@@ -21,7 +21,7 @@ type ActionResult =
       } 
     }
 
-type SyncWorkspaceData = 
+export type SyncWorkspaceData = 
   | { 
       shouldSyncWorkspace: true 
       newOrgId: string
