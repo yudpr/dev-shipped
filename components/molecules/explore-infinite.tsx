@@ -64,7 +64,8 @@ function useExploreInfinite(
           setProjects(prev => [ ...prev, ...result.data.items])
           setCursor(result.data.nextCursor)
         }
-      } catch {
+      } catch (error) {
+        console.error(error)
         setNeedRetry(true)
 
         toast.add({

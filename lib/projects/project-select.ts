@@ -170,7 +170,7 @@ export async function getExploreProjects(
   searchParams: SearchParamsType,
   cursor: CursorType | null
 ): Promise<ExploreProjectResult> {
-  const PAGE_SIZE = 2
+  const PAGE_SIZE = 10
 
   try {
     const { userId } = await auth()

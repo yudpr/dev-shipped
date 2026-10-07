@@ -71,8 +71,9 @@ export default function ProjectVoting({
             description: result.error
           })  
         }
-      } catch {
-          toast.add({
+      } catch (error) {
+        console.error(error)
+        toast.add({
           type: "error",
           description: "Network error. Please check your connection, then try again."
         })
