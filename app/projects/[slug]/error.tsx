@@ -3,14 +3,32 @@
 import EmptyState from "@/components/atoms/empty-state";
 import { Button } from "@/components/ui/button";
 import { FaceSlightlyFrowning } from "lucide-react";
+import { useTransition } from "react";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }
 
-export default function Error({error, reset}: ErrorPageProps) {
+export default function Error({error, retry}: ErrorPageProps) {
+  const [ isPending, startTransition ] = useTransition()
   console.error(error)
+  
+  const handleRetry = () => {
+    startTransition(() => {
+      retry()
+    })
+  }
+  
+  if (isPending) {
+    return (
+      <EmptyState
+        mediaSpinner
+        emptyStateDescription='Please wait a moment'
+        emptyStateTitle='Retrying...'
+      />
+    )
+  }
   return (
     <EmptyState
       emptyStateDescription="An unexpected exception occurred during data processing. Please try reloading in a moment."
@@ -19,9 +37,9 @@ export default function Error({error, reset}: ErrorPageProps) {
     >
       <Button 
         variant="outline"
-        onClick={() => reset()} 
+        onClick={() => handleRetry()} 
       >
-        Refresh
+        Retry
       </Button>
     </EmptyState>
   )
