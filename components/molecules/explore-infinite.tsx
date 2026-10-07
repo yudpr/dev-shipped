@@ -2,11 +2,13 @@
 
 import { type CursorType, type ExploreProjectSuccess } from "@/lib/projects/project-select";
 import ProjectCard from "./project-card";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { ComponentProps, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ProjectCardGroup from "../organisms/project-card-group";
-import { Compass, FaceSlightlyFrowning, Loader, SearchX, WifiOff } from "lucide-react";
+import { Compass, FaceSlightlyFrowning, Loader, RefreshCw, SearchX, WifiOff } from "lucide-react";
 import { type ExplorePageProps } from "@/app/explore/page";
 import { loadMoreExploreProjects } from "@/lib/projects/project-actions";
+import { toast } from "../ui/toast";
+import { Button } from "../ui/button";
 
 const emptyStateIconDict = {
   notFound: SearchX,
@@ -38,6 +40,7 @@ function useExploreInfinite(
   const [ projects, setProjects ] = useState(queriedProjects)
   const [ cursor, setCursor ] = useState(nextCursor)
   const [ isPending, startTransition ] = useTransition()
+  const [ needRetry, setNeedRetry ] = useState(false)
 
   const loadMoreProjects = useCallback(() => {
     if (!cursor || isPending) return
@@ -46,21 +49,28 @@ function useExploreInfinite(
       const result = await loadMoreExploreProjects(params, cursor)
       
       if (!result.success) {
-        // show result.error with sonner
+        setNeedRetry(true)
+
+        toast.add({
+          type: "error",
+          description: result.error
+        })
       } else {
         setProjects(prev => [ ...prev, ...result.data.items])
         setCursor(result.data.nextCursor)
       }
     
     })
-  }, [cursor, isPending, params])
+  }, [cursor, isPending, params, needRetry])
 
   return {
     loadMoreProjects,
+    setNeedRetry,
     state: {
       projects,
       cursor,
-      isPending
+      isPending,
+      needRetry
     }
   }
 }
@@ -82,7 +92,13 @@ export default function ExploreInfinite({
       >
         { !!exploreInfinite.state.projects.length && exploreInfinite.state.projects.map(i => <ProjectCard {...i} key={i.id}/>)}
       </ProjectCardGroup>
-        { exploreInfinite.state.cursor && <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects}/>}
+        { 
+          exploreInfinite.state.cursor 
+            ? exploreInfinite.state.needRetry 
+              ? <RetryLoadingMoreProjects onClick={() => exploreInfinite.setNeedRetry(false)}/> 
+              : <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects} />
+            : null
+        }
         { exploreInfinite.state.isPending && <LoadingMoreProjects />}
     </>
   )
@@ -113,6 +129,21 @@ function LoadingMoreProjects() {
         aria-label="Loading"
         className="animate-spin size-8 mx-auto text-primary"
       />
+    </div>
+  )
+}
+
+function RetryLoadingMoreProjects (props: { onClick: ComponentProps<typeof Button>["onClick"]}) {
+  return (
+    <div className="text-center my-4">
+      <Button
+        variant="outline"
+        size="icon-lg"
+        className="rounded-full bg-gray-200 border-gray-300 hover:bg-gray-300"
+        { ...props}
+      >
+        <RefreshCw className="size-6 text-gray-400 hover:text-gray-500" />
+      </Button>
     </div>
   )
 }
