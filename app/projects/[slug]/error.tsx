@@ -3,7 +3,7 @@
 import EmptyState from "@/components/atoms/empty-state";
 import { Button } from "@/components/ui/button";
 import { FaceSlightlyFrowning } from "lucide-react";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -19,6 +19,8 @@ export default function Error({error, retry}: ErrorPageProps) {
       retry()
     })
   }
+
+  useEffect(() => { console.error(error) }, [error]) // so it logs once
   
   if (isPending) {
     return (
