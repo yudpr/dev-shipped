@@ -150,27 +150,33 @@ export default function ProjectSubmitForm() {
   const router = useRouter()
   
   async function onSubmit(data: ProjectSubmitFormData) {
-    const result = await addProjectAction(data)
+    try {
+      const result = await addProjectAction(data)
+      
+      if (!result?.success) {
+        toast.add({
+          type: "error",
+          description: result.error
+        })  
+        return
+      }
+      
+      toast.add({
+        type: "success",
+        description: "Project submitted successfully. Your project will be reviewed shortly."
+      })
 
-    if (!result?.success) {
+      if (result.data?.sync?.shouldSyncWorkspace) {
+        router.replace('/sync-workspace?orgId=' + result.data.sync.newOrgId)
+      } else {
+        router.replace('/')
+      }
+    } catch {
       toast.add({
         type: "error",
-        description: result?.error ?? "Something went wrong"
-      })  
-      return
+        description: "Network error. Please check your connection, then try again."
+      })
     }
-    
-    toast.add({
-      type: "success",
-      description: "Project submitted successfully. Your project will be reviewed shortly."
-    })
-
-    if (result.data?.sync?.shouldSyncWorkspace) {
-      router.replace('/sync-workspace?orgId=' + result.data.sync.newOrgId)
-    } else {
-      router.replace('/')
-    }
-    
   }
 
   return (

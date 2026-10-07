@@ -62,13 +62,20 @@ export default function ProjectVoting({
       
       setOptimisticVotes(incomingVote)
 
-      const result = await projectVotingAction(projectId, incomingVote)
+      try {
+        const result = await projectVotingAction(projectId, incomingVote)
         
-      if (!result.success) {
-        toast.add({
+        if (!result.success) {
+          toast.add({
+            type: "error",
+            description: result.error
+          })  
+        }
+      } catch {
+          toast.add({
           type: "error",
-          description: result.error
-        })  
+          description: "Network error. Please check your connection, then try again."
+        })
       }
     })
   }

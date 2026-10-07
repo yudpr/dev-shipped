@@ -2,9 +2,9 @@
 
 import { type CursorType, type ExploreProjectSuccess } from "@/lib/projects/project-select";
 import ProjectCard from "./project-card";
-import { ComponentProps, useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { type ComponentProps, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ProjectCardGroup from "../organisms/project-card-group";
-import { Compass, FaceSlightlyFrowning, Loader, RefreshCw, SearchX, WifiOff } from "lucide-react";
+import { Compass, FaceSlightlyFrowning, Loader, RefreshCw, SearchX } from "lucide-react";
 import { type ExplorePageProps } from "@/app/explore/page";
 import { loadMoreExploreProjects } from "@/lib/projects/project-actions";
 import { toast } from "../ui/toast";
@@ -13,8 +13,7 @@ import { Button } from "../ui/button";
 const emptyStateIconDict = {
   notFound: SearchX,
   emptyFeed: Compass,
-  fetchError: FaceSlightlyFrowning,
-  networkError: WifiOff
+  fetchError: FaceSlightlyFrowning
 }
 
 export type EmptyStateMessageType =
@@ -46,22 +45,36 @@ function useExploreInfinite(
     if (!cursor || isPending) return
 
     startTransition(async () => {
-      const result = await loadMoreExploreProjects(params, cursor)
+      /**
+       * Re-attached try/catch block as RPC sends message over the live internet,
+       * from users' devices to our server. If network connection drops, promise 
+       * rejects.
+       */
+      try {
+        const result = await loadMoreExploreProjects(params, cursor)
       
-      if (!result.success) {
+        if (!result.success) {
+          setNeedRetry(true)
+
+          toast.add({
+            type: "error",
+            description: result.error
+          })
+        } else {
+          setProjects(prev => [ ...prev, ...result.data.items])
+          setCursor(result.data.nextCursor)
+        }
+      } catch {
         setNeedRetry(true)
 
         toast.add({
           type: "error",
-          description: result.error
+          description: "Network error. Please check your connection, then try again."
         })
-      } else {
-        setProjects(prev => [ ...prev, ...result.data.items])
-        setCursor(result.data.nextCursor)
       }
     
     })
-  }, [cursor, isPending, params, needRetry])
+  }, [cursor, isPending, params])
 
   return {
     loadMoreProjects,
@@ -93,11 +106,9 @@ export default function ExploreInfinite({
         { !!exploreInfinite.state.projects.length && exploreInfinite.state.projects.map(i => <ProjectCard {...i} key={i.id}/>)}
       </ProjectCardGroup>
         { 
-          exploreInfinite.state.cursor 
-            ? exploreInfinite.state.needRetry 
-              ? <RetryLoadingMoreProjects onClick={() => exploreInfinite.setNeedRetry(false)}/> 
-              : <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects} />
-            : null
+          exploreInfinite.state.cursor && exploreInfinite.state.needRetry 
+            ? <RetryLoadingMoreProjects onClick={() => exploreInfinite.setNeedRetry(false)}/> 
+            : <ExploreScrollSentinel onVisible={exploreInfinite.loadMoreProjects} />
         }
         { exploreInfinite.state.isPending && <LoadingMoreProjects />}
     </>
@@ -139,10 +150,14 @@ function RetryLoadingMoreProjects (props: { onClick: ComponentProps<typeof Butto
       <Button
         variant="outline"
         size="icon-lg"
-        className="rounded-full bg-gray-200 border-gray-300 hover:bg-gray-300"
+        className="rounded-full bg-muted/10 border-muted/20 hover:border-muted/30 hover:bg-muted/20"
+        aria-label="Retry loading more projects"
         { ...props}
       >
-        <RefreshCw className="size-6 text-gray-400 hover:text-gray-500" />
+        <RefreshCw 
+          className="size-6 text-muted/70 hover:text-muted" 
+          aria-hidden="true"
+        />
       </Button>
     </div>
   )
