@@ -24,7 +24,7 @@ import {
 import { Button } from "../ui/button";
 import { Sparkle } from "lucide-react";
 import ProjectTagsCombobox from "../atoms/project-tags-combobox";
-import { addProjectAction } from "@/lib/projects/project-actions";
+import { addProjectAction, type SyncWorkspaceData } from "@/lib/projects/project-actions";
 import { Spinner } from "../ui/spinner";
 import { toast } from "../ui/toast";
 import { formSchema } from "./project-submit-form.schema";
@@ -150,27 +150,45 @@ export default function ProjectSubmitForm() {
   const router = useRouter()
   
   async function onSubmit(data: ProjectSubmitFormData) {
-    const result = await addProjectAction(data)
+    let sync: SyncWorkspaceData | null = null
 
-    if (!result?.success) {
+    try {
+      const result = await addProjectAction(data)
+
+      if (!result.success) {
+        toast.add({
+          type: "error",
+          description: result.error
+        })  
+        return
+      }
+      
+      if (result.data?.sync?.shouldSyncWorkspace) {
+        sync = {
+          shouldSyncWorkspace: result.data.sync.shouldSyncWorkspace,
+          newOrgId: result.data.sync.newOrgId
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      
       toast.add({
         type: "error",
-        description: result?.error ?? "Something went wrong"
-      })  
+        description: "Network error. Please check your connection, then try again."
+      })
       return
     }
-    
+
     toast.add({
       type: "success",
       description: "Project submitted successfully. Your project will be reviewed shortly."
     })
-
-    if (result.data?.sync?.shouldSyncWorkspace) {
-      router.replace('/sync-workspace?orgId=' + result.data.sync.newOrgId)
+    
+    if (sync?.shouldSyncWorkspace) {
+      router.replace('/sync-workspace?orgId=' + sync.newOrgId)
     } else {
       router.replace('/')
     }
-    
   }
 
   return (

@@ -2,11 +2,13 @@
 
 import { type ProjectSubmitFormData } from "@/components/molecules/project-submit-form";
 import { formSchema } from "@/components/molecules/project-submit-form.schema";
+import { type SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq, sql } from "drizzle-orm";
 import { refresh } from "next/cache";
+import { type CursorType, getExploreProjects } from "./project-select";
 
 type ActionResult =
   | { success: false, error: string }
@@ -19,19 +21,18 @@ type ActionResult =
       } 
     }
 
-type SyncWorkspaceData = 
+export type SyncWorkspaceData = 
   | { 
       shouldSyncWorkspace: true 
       newOrgId: string
     }
   | { 
-      shouldSyncWorkspace?: false 
-      newOrgId?: never
-    }
+      shouldSyncWorkspace: false
+    }     
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   let targetOrgId: string | null | undefined = null
-  let shouldSyncWorkspace = false
+  let sync: SyncWorkspaceData | null = null
 
   try {
     const { userId, orgId } = await auth();
@@ -54,11 +55,12 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
           error: "Organization context is missing."
         }
       }
-
-      targetOrgId = result.data.sync.newOrgId
-      shouldSyncWorkspace = result.data.sync.shouldSyncWorkspace
+      sync = {
+        shouldSyncWorkspace: result.data.sync.shouldSyncWorkspace,
+        newOrgId: result.data.sync.newOrgId
+      }
+      targetOrgId = sync.newOrgId
     }
-
     const validatedData = formSchema.safeParse(data)
 
     if (!validatedData.success) {
@@ -70,15 +72,10 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
       organizationId: targetOrgId
     })
 
-    if (shouldSyncWorkspace) {
+    if (sync?.shouldSyncWorkspace) {
       return {
         success: true,
-        data: {
-          sync: {
-            newOrgId: targetOrgId,
-            shouldSyncWorkspace: true
-          }
-        }
+        data: { sync }
       }
     }
 
@@ -264,4 +261,11 @@ export const projectVotingAction = async (
     console.error(error)
     return { success: false, error: "Could not sync your vote with our database servers." }
   }
+}
+
+export const loadMoreExploreProjects = async (
+  searchParams: SearchParamsType, 
+  cursor: CursorType
+) => {
+  return await getExploreProjects(searchParams, cursor)
 }

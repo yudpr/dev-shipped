@@ -15,16 +15,16 @@ import { cn } from "@/lib/utils";
 interface EmptyStateProps extends
   VariantProps<typeof EmptyMedia> {
     emptyStateIcon?: LucideIcon
-    emptyStateTitle: string,
-    emptyStateDescription: string,
+    emptyStateTitle?: string,
+    emptyStateDescription?: string,
     mediaSpinner?: boolean
     children?: ComponentProps<typeof EmptyContent>["children"]
   }
 
 export default function EmptyState({
   emptyStateIcon: Icon,
-  emptyStateDescription,
-  emptyStateTitle,
+  emptyStateDescription="",
+  emptyStateTitle="",
   variant = "default",
   mediaSpinner = false,
   children = null
@@ -41,7 +41,7 @@ export default function EmptyState({
           {
             mediaSpinner
             ? <Spinner className="size-10"/>
-            : Icon && <Icon/>
+            : Icon? <Icon/>: <></>
           }
         </EmptyMedia>
         <EmptyTitle>{emptyStateTitle}</EmptyTitle>

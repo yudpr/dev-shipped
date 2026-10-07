@@ -6,12 +6,12 @@ import {
   CardAction, 
   CardDescription  
 } from "../ui/card";
-import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { StarIcon } from "lucide-react";
 import ProjectVoting from "./project-voting";
 import { InferSelectModel } from "drizzle-orm";
 import { projects, votes } from "@/db/schema";
+import ProjectCardLink from "../atoms/project-card-link";
 
 export interface ProjectCardProps extends
   Pick<InferSelectModel<typeof projects>, 
@@ -62,9 +62,7 @@ export default function ProjectCard({
       <CardFooter className="gap-2 border-0 bg-transparent scroll-fade-x overflow-y-auto scrollbar-none mx-(--card-spacing) p-0 relative z-10">
         {tags?.map(i => <Badge key={i} variant="secondary">{i}</Badge>)}
       </CardFooter>
-      <Link href={`/projects/${slug}`} className="absolute inset-0 z-0">
-        <span className="sr-only">Open {name}</span>
-      </Link>
+      <ProjectCardLink name={name} slug={slug} />
     </Card>
   )
 }

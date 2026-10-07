@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import CustomButton from "./custom-button";
 import { ArrowUpRight } from "lucide-react";
 

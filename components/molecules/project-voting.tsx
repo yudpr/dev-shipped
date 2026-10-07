@@ -71,11 +71,12 @@ export default function ProjectVoting({
             description: result.error
           })  
         }
-      } catch {
+      } catch (error) {
+        console.error(error)
         toast.add({
           type: "error",
-          description: "Network error. Please try again later."
-        })  
+          description: "Network error. Please check your connection, then try again."
+        })
       }
     })
   }

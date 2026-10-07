@@ -1,37 +1,14 @@
-import { allProjects } from "@/db/data"
+import { type Meta, type StoryObj } from "@storybook/nextjs-vite"
+import ExploreInfinite from "./explore-infinite";
+import { type ExploreProjectSuccess } from "@/lib/projects/project-select";
 
-export function getFeaturedProjects() {
-  return [
-    ...allProjects
-  ]
-}
+type ExploreInfiniteType = typeof ExploreInfinite
 
-export function getRecentProjects() {
-  return []
-}
-
-
-export function getProjectBySlug() {
-
-  return {
-    id: "projects_id",
-    name: "projects_name",
-    tagline: "projects_tagline",
-    description: "projects_description",
-    tags: ["a", "b", "c", "d", "e"],
-    createdAt: null,
-    submittedBy: "projects_submittedBy",
-    websiteUrl: "projects_websiteUrl",
-    voteCount: 123,
-    userVote: "votes_voteType"
-  }
-}
-
-const items = [
+const projects = [
   {
     createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 1,
+    id: 9,
     name: "Markdownify1",
     slug: "markdownify1",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
@@ -41,7 +18,7 @@ const items = [
   {
     createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 2,
+    id: 9,
     name: "Markdownify2",
     slug: "markdownify2",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
@@ -51,22 +28,27 @@ const items = [
   {
     createdAt: new Date(),
     description: "A collaborative, canvas-style editor built specifically for planning and drafting comprehensive developer documentation.",
-    id: 3,
+    id: 9,
     name: "Markdownify3",
     slug: "markdownify3",
     tags:  ['Productivity', 'Svelte', 'Markdown', 'Documentation', 'Editor'],
     userVote: "up",
     voteCount: 165
   }
-]
+] satisfies ExploreProjectSuccess["data"]["items"]
 
-export function getExploreProjects() {
-  return { 
-    success: true,
-    data: {
-      items,
-      totalItems: 3,
-      nextCursor: null
-    }
-  }
+
+const meta: Meta<ExploreInfiniteType> = {
+  title: "Molecules/Explore Infinite" ,
+  component: ExploreInfinite,
+  args: {
+    projects,
+  },
+  tags: ["autodocs"]
 }
+
+export default meta;
+
+type Story = StoryObj<ExploreInfiniteType>
+
+export const Default: Story = {}

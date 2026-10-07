@@ -1,3 +1,5 @@
+import { getExploreProjects } from "./project-select"
+
 export const addProjectAction = async () => {
   return { 
     success: true, 
@@ -11,4 +13,8 @@ export const checkSlugAvailability = async () => {
 
 export const projectVotingAction = async () => {
   return { success: true }
+}
+
+export const loadMoreExploreProjects = async () => {
+  return getExploreProjects()
 }

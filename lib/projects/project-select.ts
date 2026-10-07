@@ -1,8 +1,10 @@
+import { cursorSchema, searchParamsSchema, type SearchParamsType } from "@/components/organisms/project-explorer.schema";
 import { db } from "@/db";
 import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, desc, eq, sql, } from "drizzle-orm";
+import { and, count, desc, eq, ilike, type InferSelectModel, lt, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
+import { escapeLike } from "../utils";
 
 export async function getFeaturedProjects() {
   /**
@@ -127,3 +129,176 @@ export async function getProjectBySlug(slug: string) {
   
   return project
 }
+
+export type CursorType = {
+  id: number,
+  createdAt: Date,
+  voteCount: number
+}
+
+export type ExploreProjectSuccess = {
+  success: true,
+  data: {
+    items: (
+      & Pick<InferSelectModel<typeof projects>, 
+        | "id" 
+        | "name" 
+        | "slug"
+        | "description"
+        | "tags"
+        | "voteCount"
+        | "createdAt"
+        > 
+      & { 
+          userVote: 
+            | Pick<InferSelectModel<typeof votes>, "voteType">["voteType"] 
+            | null
+        }
+    )[],
+    totalItems?: number,
+    nextCursor: CursorType | null
+  }
+}
+
+type ExploreProjectFailed = {
+  success: false,
+  error: string
+}
+
+type ExploreProjectResult = ExploreProjectFailed | ExploreProjectSuccess
+
+export async function getExploreProjects(
+  searchParams: SearchParamsType,
+  cursor: CursorType | null
+): Promise<ExploreProjectResult> {
+  const PAGE_SIZE = 10
+
+  try {
+    const { userId } = await auth()
+
+    const searchParamsValidation = searchParamsSchema.safeParse(searchParams)
+
+    if (!searchParamsValidation.success) {
+      return {
+        success: false,
+        error: "Validation error: " + searchParamsValidation.error.issues.map(i => i.message).join("; ") + "."
+      }
+    }
+
+    const cursorValidation = cursorSchema.safeParse(cursor)
+
+    if (!cursorValidation.success) {
+      return {
+        success: false,
+        error: "Validation error: " + cursorValidation.error.issues.map(i => i.message).join("; ") + "."
+      }
+    }
+
+    const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
+
+    const escapedSearchQuery = escapeLike(searchQuery ?? "")
+
+    const cursorFilter = cursorValidation.data
+      ? orderBy === "trending"
+        ? or(
+            lt(projects.voteCount, cursorValidation.data.voteCount),
+            and(eq(projects.voteCount, cursorValidation.data.voteCount), lt(projects.id, cursorValidation.data.id))
+          )
+        : or(
+            lt(projects.createdAt, cursorValidation.data.createdAt),
+            and(eq(projects.createdAt, cursorValidation.data.createdAt), lt(projects.id, cursorValidation.data.id))
+          )
+      : undefined
+
+    const partialSearchQuery = `%${escapedSearchQuery}%`;
+
+    const whereCondition = searchQuery
+      ? (
+          and(
+            eq(projects.status, "approved"),
+            or(
+              ilike(projects.name, partialSearchQuery),
+              sql`EXISTS (
+                SELECT 1 FROM jsonb_array_elements_text(${projects.tags}::jsonb) AS tag
+                WHERE tag ILIKE ${partialSearchQuery}
+              )` // switched to this form because earlier form has no settings for disabling case-sensitivity
+            ),
+            cursorFilter
+          )
+        )
+      : and(
+          eq(projects.status, "approved"),
+          cursorFilter
+        )
+
+    let baseQuery = db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        slug: projects.slug,
+        description: projects.description,
+        tags: projects.tags,
+        voteCount: projects.voteCount,
+        userVote: votes.voteType,
+        createdAt: projects.createdAt
+      })
+      .from(projects)
+      .limit(PAGE_SIZE + 1) // fetch one extra to know if there's a next page, cheaply
+      .leftJoin(
+        votes,
+        and(
+          eq(votes.projectId, projects.id),
+          userId 
+            ? eq(votes.userId, userId)
+            : sql`false`
+        )
+      )
+      .where(whereCondition)
+      .$dynamic()
+      
+    baseQuery = orderBy === "trending" 
+      ? baseQuery.orderBy(desc(projects.voteCount), desc(projects.id)) // Two colums order with 'id' as an addition, in case of 'createdAt' or 'voteCount' ties.
+      : baseQuery.orderBy(desc(projects.createdAt), desc(projects.id))
+
+
+    const countQuery = db.select({ total: count() })
+      .from(projects)
+      .where(whereCondition) // potentially wrong result
+    
+    const [ results, counts ] = await Promise.all([ 
+      baseQuery, 
+      searchQuery && cursor === null // count will only visible when search query is filled and cursor is null. That means, triggering scroll sentinel won't change the count.
+        ? countQuery
+        : Promise.resolve(null) 
+    ])
+
+    const hasMore = results.length > PAGE_SIZE
+    const items = hasMore? results.slice(0, PAGE_SIZE): results
+    const lastItem = items.at(-1)
+    
+    return {
+      success: true,
+      data: {
+        items,
+        totalItems: counts 
+          ? counts[0]?.total ?? undefined
+          : undefined,
+        nextCursor: hasMore && lastItem
+          ? { 
+              id: lastItem.id, 
+              createdAt: lastItem.createdAt, 
+              voteCount: lastItem.voteCount
+            }
+          : null
+      }
+    }
+  } catch (error) {
+    console.error(error)
+
+    return {
+      success: false,
+      error: "Server error occurred."
+    }
+  }
+}
+

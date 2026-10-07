@@ -1,11 +1,11 @@
-import { ArrowLeft, Calendar, ExternalLink, Star, User } from "lucide-react"
-import Link from "next/link"
+import { Calendar, ExternalLink, Star, User } from "lucide-react"
 import { getProjectBySlug } from "@/lib/projects/project-select"
 import { notFound } from "next/navigation"
 import SectionHeader from "../molecules/section-header"
 import { Badge } from "../ui/badge"
 import ProjectVoting from "../molecules/project-voting"
 import CustomButton from "../atoms/custom-button"
+import ProjectReturnLink from "../atoms/project-return-link"
 
 type ProjectSectionProps = { params: Promise<{ slug: string }> }
 
@@ -18,10 +18,7 @@ export default async function ProjectSection({params}: ProjectSectionProps) {
   return (
     <section className="py-16">
       <div className="wrapper">
-        <Link href="/explore" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <ArrowLeft className="size-4"/>
-          Back to Explore
-        </Link>
+        <ProjectReturnLink />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-start gap-6">
