@@ -150,23 +150,18 @@ export default function ProjectSubmitForm() {
   const router = useRouter()
   
   async function onSubmit(data: ProjectSubmitFormData) {
-    let sync: SyncWorkspaceData = {}
+    let sync: SyncWorkspaceData = null
 
     try {
       const result = await addProjectAction(data)
 
-      if (!result?.success) {
+      if (!result.success) {
         toast.add({
           type: "error",
           description: result.error
         })  
         return
       }
-      
-      toast.add({
-        type: "success",
-        description: "Project submitted successfully. Your project will be reviewed shortly."
-      })
       
       if (result.data?.sync?.shouldSyncWorkspace) {
         sync = {
@@ -175,6 +170,8 @@ export default function ProjectSubmitForm() {
         }
       }
     } catch (error) {
+      console.error(error)
+      
       toast.add({
         type: "error",
         description: "Network error. Please check your connection, then try again."
@@ -182,7 +179,12 @@ export default function ProjectSubmitForm() {
       return
     }
 
-    if (sync.shouldSyncWorkspace) {
+    toast.add({
+      type: "success",
+      description: "Project submitted successfully. Your project will be reviewed shortly."
+    })
+    
+    if (sync?.shouldSyncWorkspace) {
       router.replace('/sync-workspace?orgId=' + sync.newOrgId)
     } else {
       router.replace('/')

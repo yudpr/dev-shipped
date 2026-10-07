@@ -26,10 +26,7 @@ export type SyncWorkspaceData =
       shouldSyncWorkspace: true 
       newOrgId: string
     }
-  | { 
-      shouldSyncWorkspace?: false 
-      newOrgId?: never
-    }
+  | null
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   let targetOrgId: string | null | undefined = null
