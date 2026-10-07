@@ -186,7 +186,7 @@ export async function getExploreProjects(
 
     const cursorValidation = cursorSchema.safeParse(cursor)
 
-    if (!cursorValidation.success && cursor !== null) {
+    if (!cursorValidation.success && cursor !== null && cursor !== undefined) {
       return {
         success: false,
         error: "Validation error: " + cursorValidation.error.issues.map(i => i.message).join("; ") + "."

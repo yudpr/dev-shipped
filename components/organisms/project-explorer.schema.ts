@@ -17,9 +17,10 @@ export const cursorSchema = z.object({
   id: z
     .number(),
   createdAt: z
-    .coerce.date(),
+    .date(),
   voteCount: z
     .number()
 })
+  .nullish()
 
 export type SearchParamsType = z.infer<typeof searchParamsSchema>
