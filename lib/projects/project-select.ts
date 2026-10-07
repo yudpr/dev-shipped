@@ -4,6 +4,7 @@ import { projects, votes } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, count, desc, eq, ilike, type InferSelectModel, lt, or, sql, } from "drizzle-orm";
 import { connection } from "next/server";
+import { escapeLike } from "../utils";
 
 export async function getFeaturedProjects() {
   /**
@@ -186,7 +187,7 @@ export async function getExploreProjects(
 
     const cursorValidation = cursorSchema.safeParse(cursor)
 
-    if (!cursorValidation.success && cursor !== null && cursor !== undefined) {
+    if (!cursorValidation.success) {
       return {
         success: false,
         error: "Validation error: " + cursorValidation.error.issues.map(i => i.message).join("; ") + "."
@@ -194,6 +195,8 @@ export async function getExploreProjects(
     }
 
     const {query: searchQuery, sort: orderBy } = searchParamsValidation.data
+
+    const escapedSearchQuery = escapeLike(searchQuery ?? "")
 
     const cursorFilter = cursorValidation.data
       ? orderBy === "trending"
@@ -207,7 +210,7 @@ export async function getExploreProjects(
           )
       : undefined
 
-    const partialSearchQuery = `%${searchQuery}%`;
+    const partialSearchQuery = `%${escapedSearchQuery}%`;
 
     const whereCondition = searchQuery
       ? (
