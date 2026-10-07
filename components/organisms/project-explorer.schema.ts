@@ -17,7 +17,7 @@ export const cursorSchema = z.object({
   id: z
     .number(),
   createdAt: z
-    .date(),
+    .coerce.date(),
   voteCount: z
     .number()
 })
