@@ -25,10 +25,11 @@ function ProjectCardLinkView({
 }: ProjectCardLinkProps) {
   const searchParams = useSearchParams()
   const currentParams = searchParams.toString()
+  const returnParams = currentParams ? `?returnParams=${encodeURIComponent(currentParams)}` : ""
 
   return (
     <Link 
-      href={`/projects/${slug}?returnParams=${encodeURIComponent(currentParams)}`} 
+      href={`/projects/${slug}${returnParams}`} 
       className="absolute inset-0 z-0"
     >
       <span className="sr-only">Open {name}</span>
