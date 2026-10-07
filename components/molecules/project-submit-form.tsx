@@ -150,7 +150,7 @@ export default function ProjectSubmitForm() {
   const router = useRouter()
   
   async function onSubmit(data: ProjectSubmitFormData) {
-    let sync: SyncWorkspaceData = null
+    let sync: SyncWorkspaceData | null = null
 
     try {
       const result = await addProjectAction(data)

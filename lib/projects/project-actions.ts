@@ -26,11 +26,13 @@ export type SyncWorkspaceData =
       shouldSyncWorkspace: true 
       newOrgId: string
     }
-  | null
+  | { 
+      shouldSyncWorkspace: false
+    }     
 
 export const addProjectAction = async (data: ProjectSubmitFormData): Promise<ActionResult> => {
   let targetOrgId: string | null | undefined = null
-  let shouldSyncWorkspace = false
+  let sync: SyncWorkspaceData | null = null
 
   try {
     const { userId, orgId } = await auth();
@@ -53,9 +55,10 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
           error: "Organization context is missing."
         }
       }
-
-      targetOrgId = result.data.sync.newOrgId
-      shouldSyncWorkspace = result.data.sync.shouldSyncWorkspace
+      sync = {
+        shouldSyncWorkspace: result.data.sync.shouldSyncWorkspace,
+        newOrgId: result.data.sync.newOrgId
+      }
     }
 
     const validatedData = formSchema.safeParse(data)
@@ -69,15 +72,10 @@ export const addProjectAction = async (data: ProjectSubmitFormData): Promise<Act
       organizationId: targetOrgId
     })
 
-    if (shouldSyncWorkspace) {
+    if (sync?.shouldSyncWorkspace) {
       return {
         success: true,
-        data: {
-          sync: {
-            newOrgId: targetOrgId,
-            shouldSyncWorkspace: true
-          }
-        }
+        data: { sync }
       }
     }
 
